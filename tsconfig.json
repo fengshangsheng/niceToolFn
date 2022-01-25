@@ -6,7 +6,8 @@
     "jsx": "react", // 在 .tsx 文件里支持 jsx,
     "removeComments": true, // 删除所有注释，除了以 /!* 开头的版权信息。
     "outDir": "./dist",
-    "strict": true
+    "strict": true,
+    "allowSyntheticDefaultImports": true
   },
   "include": [
     "src/**/*" // 需要编译的文件
