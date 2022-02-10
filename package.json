@@ -1,15 +1,11 @@
 {
   "name": "nicetoolfn",
-  "version": "1.0.3",
+  "version": "1.0.0",
   "description": "",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
+  "main": "./lib/mian.js",
   "scripts": {
-    "start": "cross-env NODE_ENV=development webpack-dev-server",
-    "build": "cross-env NODE_ENV=production npx webpack"
+    "dev": "webpack-dev-server --config config/webpack.dev.js",
+    "build": "webpack --config config/webpack.prod.js"
   },
   "repository": {
     "type": "git",
@@ -23,26 +19,24 @@
   },
   "homepage": "https://github.com/fengshangsheng/niceToolFn#readme",
   "devDependencies": {
-    "@types/react": "^17.0.38",
-    "@types/react-dom": "^17.0.11",
-    "clean-webpack-plugin": "4.0.0",
-    "cross-env": "^7.0.3",
-    "css-loader": "6.5.1",
-    "html-webpack-plugin": "^5.5.0",
-    "less-loader": "10.2.0",
-    "style-loader": "3.3.1",
-    "ts-loader": "9.2.6",
-    "webpack": "5.67.0",
-    "webpack-cli": "4.9.2",
-    "webpack-dev-server": "4.7.3"
+    "@babel/cli": "^7.17.0",
+    "@babel/core": "^7.17.2",
+    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-react": "^7.16.7",
+    "@types/react": "^17.0.39",
+    "babel-loader": "^8.2.3",
+    "clean-webpack-plugin": "^4.0.0",
+    "css-loader": "^6.6.0",
+    "mini-css-extract-plugin": "^2.5.3",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "style-loader": "^3.3.1",
+    "ts-loader": "^9.2.6",
+    "typescript": "^4.5.5",
+    "webpack": "^5.68.0",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.7.4",
+    "webpack-merge": "^5.8.0"
   },
-  "dependencies": {
-    "react": ">=17.0.2",
-    "react-dom": ">=17.0.2"
-  },
-  "peerDependencies": {
-    "node": "16.13.2",
-    "react": ">=17.0.2",
-    "react-dom": ">=17.0.2"
-  }
+  "dependencies": {}
 }

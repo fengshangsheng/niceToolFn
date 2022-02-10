@@ -1,16 +1,14 @@
-import React, { Fragment } from "react";
-import ReactDOM from 'react-dom';
+import { TipModal } from '@/components/Modal';
+import { TipInput } from '@/components/Input';
 
-import Modal from './modal/modal';
+// exports.TipInput = TipInput;
+// exports.TipModal = TipModal;
 
 
-ReactDOM.render(
-  <Fragment>
-    <Modal/>
-  </Fragment>,
-  document.getElementById('root')
-);
-
+// module.exports = {
+//   TipModal,TipInput
+// }
 export {
-  Modal
+  TipModal,
+  TipInput
 }
