@@ -4,10 +4,22 @@ const baseConfig = require('./webpack.common.js'); // 引用公共配置
 
 const absolutePath = path.resolve(__dirname, './../test');
 
+/*入口配置*/
+// function entryConfig() {
+//   const _path = path.join(__dirname, "./../src");
+//   console.log('_path',_path);
+//   const requireComponent = require.context(_path, true, /\.(tsx|ts)$/);
+//   requireComponent.keys().forEach((filename) => {
+//     const component = requireComponent((filename));
+//     console.log(component);
+//   })
+// }
+// entryConfig();
+
 const devConfig = {
   mode: 'development', // 开发模式
   devtool: "eval-source-map",
-  entry: path.resolve(__dirname, absolutePath, "./index.js"), // 项目入口，处理资源文件的依赖关系
+  entry: path.resolve(__dirname, absolutePath, "./test.js"), // 项目入口，处理资源文件的依赖关系
   output: {
     path: path.resolve(__dirname, absolutePath),
     filename: "bundle.js", // 使用webpack-dev-sevrer启动开发服务时，并不会实际在`src`目录下生成bundle.js，打包好的文件是在内存中的，但并不影响我们使用。

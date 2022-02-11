@@ -1,19 +1,20 @@
 const path = require('path');
 const {merge} = require('webpack-merge');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
-const baseConfig = require('./webpack.common.js'); // 引用公共的配置
+const baseConfig = require('./webpack.common.js');
 
+console.log('require', Object.keys(require));
+console.log(' require.context', require.context);
 const prodConfig = {
   mode: 'production', // 开发模式
-  entry: path.join(__dirname, "./../src/index.tsx"),
+  entry: path.join(__dirname, "./../src/components/index.tsx"),
   output: {
     path: path.join(__dirname, "./../lib/"),
     filename: "[name].js",
-    libraryTarget: 'commonjs', // 采用通用模块定义
+    libraryTarget: 'commonjs2', // 采用通用模块定义
     libraryExport: 'default', // 兼容 ES6 的模块系统、CommonJS 和 AMD 模块规范
   },
-  module: {
-  },
+  module: {},
   plugins: [
     new CleanWebpackPlugin(),
   ],
@@ -32,5 +33,6 @@ const prodConfig = {
     }
   },
 };
+
 
 module.exports = merge(prodConfig, baseConfig); // 将baseConfig和prodConfig合并为一个配置

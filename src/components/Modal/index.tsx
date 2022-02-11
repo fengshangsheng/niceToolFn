@@ -1,15 +1,14 @@
 import React from 'react';
 
 // import * as styles from './index.css';
-class TipModal extends React.Component {
+export default class TipModal extends React.Component {
   hander(e: any) {
     console.log(e);
-    console.log('ccc');
+    console.log('ccc', require, require.context);
   }
 
   render() {
-    return <h2 onClick={(e) => this.hander(e)}>xxxxxfengfeng</h2>
+    return <h2 onClick={(e) => this.hander(e)}>vv</h2>
   }
 }
 
-export { TipModal } ;
