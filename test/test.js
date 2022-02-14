@@ -1,25 +1,15 @@
 import React from 'react'
 import { render } from 'react-dom'
-import ALL, { TipInput, TipModal } from '@/components/' // 引入组件
-import Utils, { Count } from '@/uitls';
+// import ALL, { TipInput, TipModal, Utils } from '@/' // 引入组件
 
-// import { TipInput } from '@/components/TipInput'
-// import TipModal from '@/components/TipModal'
+import { TipInput, TipModal, Utils } from './../lib'
 
-console.log('ALL', ALL);
-console.log('TipInput', TipInput);
-console.log('TipModal', TipModal);
-console.log('Utils', Utils);
-console.log('Count', Count);
-console.log('require', require);
-var a = require.context('./../src/', true)
-console.log('~~~~~~~~~', a.keys());
-
+console.log(Utils);
 const App = () => <>
-  <TipModal/>
+  <TipModal/>1
   <br/>
-  <TipInput/>
+  <TipInput/>3
   <br/>
-  <button onClick={() => Count(1, 2)}>click</button>
+  <button onClick={() => Utils.Count(true, 2)}>click2</button>
 </>
 render(<App/>, document.getElementById('root'))

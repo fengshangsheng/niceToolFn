@@ -4,18 +4,6 @@ const baseConfig = require('./webpack.common.js'); // 引用公共配置
 
 const absolutePath = path.resolve(__dirname, './../test');
 
-/*入口配置*/
-// function entryConfig() {
-//   const _path = path.join(__dirname, "./../src");
-//   console.log('_path',_path);
-//   const requireComponent = require.context(_path, true, /\.(tsx|ts)$/);
-//   requireComponent.keys().forEach((filename) => {
-//     const component = requireComponent((filename));
-//     console.log(component);
-//   })
-// }
-// entryConfig();
-
 const devConfig = {
   mode: 'development', // 开发模式
   devtool: "eval-source-map",

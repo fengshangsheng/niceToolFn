@@ -12,4 +12,4 @@ class TipInput extends React.Component {
   }
 }
 
-export { TipInput };
+export default TipInput;

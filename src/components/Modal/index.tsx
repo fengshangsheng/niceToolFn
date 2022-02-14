@@ -1,6 +1,6 @@
 import React from 'react';
+import { Title } from '@/components/Modal/style'
 
-// import * as styles from './index.css';
 export default class TipModal extends React.Component {
   hander(e: any) {
     console.log(e);
@@ -8,7 +8,9 @@ export default class TipModal extends React.Component {
   }
 
   render() {
-    return <h2 onClick={(e) => this.hander(e)}>vv</h2>
+    return <div>
+      <Title onClick={(e: any) => this.hander(e)}>vv</Title>
+    </div>
   }
 }
 
