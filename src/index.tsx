@@ -1,13 +1,10 @@
-import TipModal from '@/components/Modal';
-import TipInput from '@/components/Input';
+import Modal from '@/components/Modal';
 import Utils from '@/uitls'
 
-export { TipInput };
-export { TipModal };
+export { Modal };
 export { Utils }
 export default {
-  TipModal,
-  TipInput,
+  Modal,
   Utils
 }
 
