@@ -1,4 +1,7 @@
+const path = require('path');
+
 module.exports = {
+  target: ['web', 'es5'],
   resolve: {
     // 模块路径别名
     alias: {
@@ -11,8 +14,19 @@ module.exports = {
     unknownContextCritical: false,
     rules: [{
       // 使用 babel-loader 来编译处理 js 和 jsx 文件
-      test: /\.(js|jsx)$/,
-      use: "babel-loader",
+      test: /\.js$/,
+      // use: "babel-loader",
+      use: {
+        loader: 'babel-loader',
+        options: {
+          presets: ['@babel/preset-env']
+        }
+      },
+      // include: [
+      //   path.resolve(__dirname, '../src'),
+      //   path.resolve(__dirname, '../test'),
+      //   path.resolve(__dirname, '../node_modules/jquery/dist/jquery.min.js')
+      // ],
       exclude: /node_modules/
     }, {
       test: /\.(ts|tsx)?$/,

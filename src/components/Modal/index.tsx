@@ -1,63 +1,38 @@
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import { isDomEle } from '@/uitls';
 import { Component, Mask } from '@/components/Modal/style';
 import { StyledComponent } from "styled-components";
 
-// class Popup extends React.Component {
-//   constructor(props) {
-//     super(props);
-//   }
-//
-//   componentDidUpdate(prevProps: Readonly<{}>, prevState: Readonly<{}>, snapshot?: any) {
-//     ReactDOM.createPortal(
-//       this.props.children,
-//       this.props.targetContent
-//     )
-//   }
-//
-//   renderContent() {
-//     return (
-//       <Component>
-//         {this.props.children}
-//       </Component>
-//     )
-//   }
-//
-//   render() {
-//     return null
-//   }
-// }
-
 export default class Modal {
-  constructor(component: FunctionComponent, option?: any) {
+  constructor(component: typeof React.Component) {
     this.content = component;
-    this.option = option
     this.init();
+
+    console.log('fengfeng');
+    console.log(new Map());
   };
 
-  private option: any;
-
   // 内容主体
-  private content: FunctionComponent;
+  content: typeof React.Component;
   // 挂载页面目标节点
-  private targetContentNode?: HTMLElement;
+  targetContentNode?: Element;
 
-  private init() {
+  init() {
     this.targetContentNode = this.verifyParameter();
 
     this.setDomFlag(this.targetContentNode, 'modal');
     this.setDomFlag(Mask, 'mask');
-     this.render();
+    this.render();
 
     setTimeout(() => {
-      this.playAnimate();
+      this.playAnimate(true);
     })
   }
 
   // 验证参数
-  private verifyParameter() {
+  verifyParameter() {
     if (this.targetContentNode === undefined) {
       const _target: HTMLElement = document.createElement('div');
       document.body.appendChild(_target);
@@ -67,7 +42,7 @@ export default class Modal {
   }
 
   // 设置DOM节点标识
-  private setDomFlag(target: HTMLElement | StyledComponent<any, any>, type: string) {
+  setDomFlag(target: Element | StyledComponent<any, any>, type: string) {
     if (isDomEle(target)) {
       $(target).attr({
         [`data-nicetoolfn-${type}`]: String(Date.now())
@@ -80,26 +55,47 @@ export default class Modal {
     }
   }
 
-
-  private render() {
-    const Content = this.content
-    console.log('option', this.option);
+  render() {
+    const Content = this.content;
     ReactDOM.render(
       <Component>
         <Mask/>
-        <Content {...this.option}/>
+        <Content
+          handleClose={() => this.handleClose()}
+        />
       </Component>,
       this.targetContentNode as HTMLElement
     );
   }
 
-  private playAnimate() {
-    $('[data-nicetoolfn-mask]')
-      .fadeOut()
-      .eq(-1)
-      .fadeIn();
+  playAnimate(isInit: boolean, callback?: Function) {
+    if (isInit) {
+      $('[data-nicetoolfn-mask]').fadeOut(150).eq(-1).fadeIn(150);
+      $('[data-nicetoolfn-mask] + *').css({
+        opacity: 1,
+        transform: 'translate(-50%, -50%) scale(1, 1)'
+      });
+    } else {
+      $("[data-nicetoolfn-mask]").eq(-1).fadeOut(150);
+      $('[data-nicetoolfn-mask] + *').eq(-1).css({
+        opacity: 0,
+        transform: 'translate(-50%, -50%) scale(1.2, 1.2)'
+      });
+      $("[data-nicetoolfn-mask]").eq(-2).fadeIn(150)
 
-    $('[data-nicetoolfn-mask] + *').fadeIn();
+      setTimeout(() => {
+        callback && callback()
+      }, 150)
+    }
+  }
+
+  // 关闭当前弹窗
+  handleClose() {
+    this.playAnimate(false, () => {
+      const modalId: string | undefined = $(this.targetContentNode as Element).attr('data-nicetoolfn-modal');
+      ReactDOM.unmountComponentAtNode(this.targetContentNode as Element);
+      modalId && $(`[data-nicetoolfn-modal=${modalId}]`).remove();
+    });
   }
 }
 

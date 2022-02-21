@@ -11,6 +11,9 @@ const devConfig = {
   output: {
     path: path.resolve(__dirname, absolutePath),
     filename: "bundle.js", // 使用webpack-dev-sevrer启动开发服务时，并不会实际在`src`目录下生成bundle.js，打包好的文件是在内存中的，但并不影响我们使用。
+    environment: {
+      arrowFunction: false
+    }
   },
   module: {
     rules: []
