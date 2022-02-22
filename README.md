@@ -1,8 +1,23 @@
-### 弹窗
+### 引入前准备
 ```javascript
-import Modal from 'nicetoolfn/Modal';
+// webpack.config.js
+module.exports = {
+  resolve: {
+    alias: {
+      'styled-components': path.resolve(__dirname, './../node_modules/styled-components'),
+      'react': path.resolve(__dirname, './../node_modules/react'),
+      'react-dom': path.resolve(__dirname, './../node_modules/react-dom')
+    }
+  }
+}
+```
 
-new Modal((props) => {
+### 弹窗
+
+```javascript
+import Modal from 'nicetoolfn/lib/components/Modal';
+
+const curModal = new Modal((props) => {
   const [a, setA] = useState(0);
   console.log(props);
   return (
