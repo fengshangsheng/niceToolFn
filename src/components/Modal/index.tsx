@@ -5,8 +5,6 @@ import { Component, Mask } from '@/components/Modal/style';
 import { StyledComponent } from "styled-components";
 
 interface IComponentProps {
-  // 关闭弹窗
-  closeModal: Function
 }
 
 interface IPropsOption {
@@ -14,9 +12,9 @@ interface IPropsOption {
 }
 
 export default class Modal {
-  constructor(component: React.SFC<IComponentProps>, props: IPropsOption = {}) {
+  constructor(component: React.SFC<IComponentProps>, propsOption: IPropsOption = {}) {
     this.content = component;
-    this.props = props;
+    this.propsOption = propsOption;
     this.init();
   };
 
@@ -25,7 +23,7 @@ export default class Modal {
   // 挂载页面目标节点
   targetContentNode?: HTMLElement;
   //
-  props?: IPropsOption;
+  propsOption?: IPropsOption;
 
   init() {
     this.targetContentNode = this.verifyParameter();
@@ -88,10 +86,6 @@ export default class Modal {
       const modalId: string | null = (this.targetContentNode as HTMLElement).getAttribute('data-nicetoolfn-modal')
       const targetDom = document.querySelector<Element>(`[data-nicetoolfn-modal="${modalId}"]`);
 
-      // @ts-ignore
-      this.aaaaaa();
-      console.log('this[\'aaaaaa\']', this);
-
       ReactDOM.unmountComponentAtNode(this.targetContentNode as HTMLElement);
       // @ts-ignore
       targetDom !== null && targetDom.parentNode.removeChild(targetDom);
@@ -100,13 +94,14 @@ export default class Modal {
 
   render() {
     const Content = this.content;
+    console.log(Content);
     ReactDOM.render(
       <Component>
         <Mask/>
-        <Content
-          closeModal={() => this.closeModal()}
-          {...this.props}
-        />
+        {typeof Content === 'object' && Content}
+        {typeof Content === 'function' && <Content
+          {...this.propsOption}
+        />}
       </Component>,
       this.targetContentNode as HTMLElement
     );

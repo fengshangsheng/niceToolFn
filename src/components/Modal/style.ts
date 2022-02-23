@@ -11,7 +11,6 @@ const Component = styled.div`
     position: fixed;
     top: 50%;
     left: 50%;
-    background-color: rgb(0, 21, 255);
     opacity: 0;
     transform: translate(-50%, -50%) scale(1.15, 1.15);
     transition: transform 150ms, opacity 150ms;
@@ -21,8 +20,7 @@ const Component = styled.div`
 const Mask = styled.div`
   position: fixed;
   z-index: 999;
-  //left: 0;
-  width: 50%;
+  left: 0;
   top: 0;
   bottom: 0;
   right: 0;
