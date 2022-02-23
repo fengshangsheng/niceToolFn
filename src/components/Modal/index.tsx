@@ -5,6 +5,7 @@ import { Component, Mask } from '@/components/Modal/style';
 import { StyledComponent } from "styled-components";
 
 interface IComponentProps {
+  [key: string]: any
 }
 
 interface IPropsOption {
@@ -94,7 +95,6 @@ export default class Modal {
 
   render() {
     const Content = this.content;
-    console.log(Content);
     ReactDOM.render(
       <Component>
         <Mask/>
