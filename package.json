@@ -1,6 +1,6 @@
 {
   "name": "nicetoolfn",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "",
   "main": "lib/index.js",
   "module": "lib/index.js",
@@ -50,6 +50,5 @@
     "webpack-dev-server": "4.7.4",
     "webpack-merge": "5.8.0"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }
