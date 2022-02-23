@@ -7,8 +7,8 @@ interface IPropsOption {
     [key: string]: any;
 }
 export default class Modal {
-    constructor(component: React.SFC<IComponentProps>, propsOption?: IPropsOption);
-    content: React.SFC<IComponentProps>;
+    constructor(component: React.SFC<IComponentProps> | React.ReactElement<IComponentProps>, propsOption?: IPropsOption);
+    content: React.SFC<IComponentProps> | React.ReactElement<IComponentProps>;
     targetContentNode?: HTMLElement;
     propsOption?: IPropsOption;
     init(): void;
