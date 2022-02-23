@@ -13,14 +13,14 @@ interface IPropsOption {
 }
 
 export default class Modal {
-  constructor(component: React.SFC<IComponentProps>, propsOption: IPropsOption = {}) {
+  constructor(component: React.SFC<IComponentProps> | React.ReactElement<IComponentProps>, propsOption: IPropsOption = {}) {
     this.content = component;
     this.propsOption = propsOption;
     this.init();
   };
 
   // 内容主体
-  content: React.SFC<IComponentProps>;
+  content: React.SFC<IComponentProps> | React.ReactElement<IComponentProps>;
   // 挂载页面目标节点
   targetContentNode?: HTMLElement;
   //
