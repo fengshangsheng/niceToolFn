@@ -9,6 +9,7 @@
     "dev": "webpack-dev-server --config config/webpack.dev.js",
     "build": "webpack --watch --config config/webpack.prod.js"
   },
+  "sideEffects": false,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/fengshangsheng/niceToolFn.git"
@@ -50,5 +51,8 @@
     "webpack-dev-server": "4.7.4",
     "webpack-merge": "5.8.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "babel-polyfill": "^6.26.0",
+    "core-js": "^3.21.1"
+  }
 }

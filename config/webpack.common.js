@@ -14,19 +14,8 @@ module.exports = {
     unknownContextCritical: false,
     rules: [{
       // 使用 babel-loader 来编译处理 js 和 jsx 文件
-      test: /\.js$/,
-      // use: "babel-loader",
-      use: {
-        loader: 'babel-loader',
-        options: {
-          presets: ['@babel/preset-env']
-        }
-      },
-      // include: [
-      //   path.resolve(__dirname, '../src'),
-      //   path.resolve(__dirname, '../test'),
-      //   path.resolve(__dirname, '../node_modules/jquery/dist/jquery.min.js')
-      // ],
+      test: /\.(js|ts|tsx)$/,
+      use: "babel-loader",
       exclude: /node_modules/
     }, {
       test: /\.(ts|tsx)?$/,

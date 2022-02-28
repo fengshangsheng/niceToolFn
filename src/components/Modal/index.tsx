@@ -88,6 +88,7 @@ export default class Modal {
       const targetDom = document.querySelector<Element>(`[data-nicetoolfn-modal="${modalId}"]`);
 
       ReactDOM.unmountComponentAtNode(this.targetContentNode as HTMLElement);
+
       // @ts-ignore
       targetDom !== null && targetDom.parentNode.removeChild(targetDom);
     }, 150));

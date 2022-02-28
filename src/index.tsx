@@ -1,3 +1,4 @@
+import "babel-polyfill";
 import Modal from './components/Modal';
 import Utils from './uitls'
 
