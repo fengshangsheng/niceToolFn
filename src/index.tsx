@@ -1,11 +1,6 @@
-import "babel-polyfill";
-import Modal from './components/Modal';
-import Utils from './uitls'
+import * as React from 'react';
 
-export { Modal };
-export { Utils }
-export default {
-  Modal,
-  Utils
-}
-
+// Delete me
+export const Thing = () => {
+  return <div>the snozzberries taste like snozzberries</div>;
+};
