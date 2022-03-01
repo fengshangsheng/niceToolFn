@@ -46,6 +46,11 @@
       "limit": "10 KB"
     }
   ],
+  "browserslist": [
+    "last 2 versions",
+    "Android >= 4.4",
+    "iOS >= 9"
+  ],
   "devDependencies": {
     "@size-limit/preset-small-lib": "^7.0.8",
     "@types/react": "^17.0.39",
@@ -57,5 +62,12 @@
     "tsdx": "^0.14.1",
     "tslib": "^2.3.1",
     "typescript": "^4.6.2"
+  },
+  "dependencies": {
+    "autoprefixer": "^10.4.2",
+    "cssnano": "^5.0.17",
+    "less": "^4.1.2",
+    "postcss": "^8.4.7",
+    "rollup-plugin-postcss": "^4.0.2"
   }
 }

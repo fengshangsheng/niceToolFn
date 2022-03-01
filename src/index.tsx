@@ -1,6 +1,13 @@
 import * as React from 'react';
+import './index.less';
 
-// Delete me
-export const Thing = () => {
-  return <div>the snozzberries taste like snozzberries</div>;
+import Modal from './components/Modal'
+
+const Thing = () => (
+  <div className="react-easy-popup">hello,react-easy-popup</div>
+);
+
+export {
+  Thing,
+  Modal
 };
