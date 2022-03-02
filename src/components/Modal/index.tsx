@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { CSSTransition } from 'react-transition-group';
 import './style.less';
 
 /**
@@ -16,27 +17,19 @@ export default class Index {
 
   // 挂载页面目标节点
   private rootDOM: HTMLElement | null = null;
-  private maskDOM: JSX.Element | null = null;
-  // private flag: number = Date.now();
+  private flag: number = Date.now();
+  private showModal: boolean = false
 
   private init() {
     this.rootDOM = this.initTargetDOM('root') as HTMLElement;
-    this.maskDOM = this.initTargetDOM('mask') as JSX.Element;
+    this.rootDOM.setAttribute('data-nicetoolfn-modal', String(this.flag));
 
-    // this.initDomFlag(this.rootDOM, 'root');
-    // this.initDomFlag(this.maskDOM, 'mask');
-
+    this.setShowModal(true);
     this.render();
-
-    setTimeout(() => {
-      // this.playAnimate(true);
-    })
   }
 
-  initTargetDOM(type: ITargetDOM): HTMLElement | JSX.Element | null {
+  initTargetDOM(type: ITargetDOM): HTMLElement | null {
     switch (type) {
-      case "mask":
-        return <div/>;
       case "root":
         const _target: HTMLElement = document.createElement('div');
         document.body.appendChild(_target);
@@ -45,22 +38,6 @@ export default class Index {
         return null;
     }
   }
-
-  // 设置DOM节点标识
-  // initDomFlag(target: HTMLElement | JSX.Element, type: ITargetDOM) {
-  //   switch (type) {
-  //     case "mask":
-  //       console.log(target);
-  //       console.log((target as JSX.Element).props.set);
-  //       (target as JSX.Element).props.set({
-  //         [`data-nicetoolfn-${type}`]: String(Date.now())
-  //       })
-  //       break;
-  //     case "root":
-  //       (target as HTMLElement).setAttribute(`data-nicetoolfn-${type}`, String(Date.now()));
-  //       break;
-  //   }
-  // }
 
   playAnimate(isInit: boolean, callback?: Function) {
     if (isInit) {
@@ -83,32 +60,39 @@ export default class Index {
     callback && callback()
   }
 
-  // 关闭当前弹窗
   closeModal() {
-    this.playAnimate(false, () => setTimeout(() => {
-      const modalId: string | null = (this.rootDOM as HTMLElement).getAttribute('data-nicetoolfn-modal')
-      const targetDom = document.querySelector<Element>(`[data-nicetoolfn-modal="${modalId}"]`);
+    this.setShowModal(false);
+    // this.playAnimate(false, () => setTimeout(() => {
+    //   const modalId: string | null = (this.rootDOM as HTMLElement).getAttribute('data-nicetoolfn-modal')
+    //   const targetDom = document.querySelector<Element>(`[data-nicetoolfn-modal="${modalId}"]`);
+    //
+    //   ReactDOM.unmountComponentAtNode(this.rootDOM as HTMLElement);
+    //
+    //   // @ts-ignore
+    //   targetDom !== null && targetDom.parentNode.removeChild(targetDom);
+    // }, 150));
+  }
 
-      ReactDOM.unmountComponentAtNode(this.rootDOM as HTMLElement);
-
-      // @ts-ignore
-      targetDom !== null && targetDom.parentNode.removeChild(targetDom);
-    }, 150));
+  setShowModal(data: boolean) {
+    this.showModal = data
   }
 
   render() {
     const Component = this.component;
-    const Mask = this.maskDOM;
-    console.log('Mask', Mask);
     ReactDOM.render(
-      <div>
-        {Mask}
-
-        {typeof Component === 'object' && Component}
-        {typeof Component === 'function' && <Component
-          {...this.propsOption}
-        />}
-      </div>,
+      <>
+        <div data-nicetoolfn-mask={this.flag}/>
+        <CSSTransition
+          in={this.showModal}
+          timeout={300}
+          classNames="modal"
+          appear
+        >
+          {typeof Component === 'object' ? Component :
+            typeof Component === 'function' ? <Component {...this.propsOption}/>
+              : Component}
+        </CSSTransition>
+      </>,
       this.rootDOM as HTMLElement
     );
   }
@@ -123,4 +107,4 @@ interface IPropsOption {
   [key: string]: any
 }
 
-type ITargetDOM = 'root' | 'mask';
+type ITargetDOM = 'root';

@@ -1,3 +1,23 @@
-body {
-  //background-color: rgba(255, 0, 0, 0.25);
+div[data-nicetoolfn-mask] {
+  display: block;
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(17, 0, 255, 0.21);
+  z-index: 9;
+}
+
+div[data-nicetoolfn-mask] + * {
+  z-index: 10;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+
+.modal-appear{
+
 }

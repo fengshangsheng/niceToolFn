@@ -1,0 +1,50 @@
+#nicetoolfn-modal {
+  & > .nicetoolfn-mask {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.2);
+    transform: none;
+    z-index: 10;
+  }
+
+  & > div:last-child div {
+    position: fixed;
+    z-index: 9;
+    left: 50%;
+    top: 50%;
+    transform: scale(1, 1) translate(-50%, -50%);
+
+    &:last-child {
+      z-index: 10;
+    }
+  }
+}
+
+.nicetoolfnPopupItem-enter {
+  opacity: 0;
+  transform: scale(1.2, 1.2) translate(-50%, -50%) !important;
+  transition: opacity 300ms ease-in, transform 300ms ease-in;
+}
+
+.nicetoolfnPopupItem-enter-active {
+  opacity: 1;
+  transform: scale(1.2, 1.2) translate(-50%, -50%) !important;
+  transition: opacity 300ms ease-in, transform 300ms ease-in;
+}
+
+.nicetoolfnPopupItem-enter-done {
+  transform: scale(1.2, 1.2) translate(-50%, -50%) !important;
+  transition: opacity 300ms ease-in, transform 300ms ease-in;
+}
+
+.nicetoolfnPopupItem-exit {
+  opacity: 1;
+}
+
+.nicetoolfnPopupItem-exit-active {
+  opacity: 0;
+  transition: opacity 500ms ease-in;
+}

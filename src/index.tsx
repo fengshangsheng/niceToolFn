@@ -2,6 +2,7 @@ import * as React from 'react';
 import './index.less';
 
 import Modal from './components/Modal'
+import Popup from './components/Popup'
 
 const Thing = () => (
   <div className="react-easy-popup">hello,react-easy-popup</div>
@@ -9,5 +10,6 @@ const Thing = () => (
 
 export {
   Thing,
-  Modal
+  Modal,
+  Popup
 };
