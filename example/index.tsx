@@ -23,13 +23,11 @@ const App = () => {
   }
   const handlePopup = () => {
     new Popup((props) => {
-      console.log('props', props);
       const [count, updateCount] = useState(0);
       const [data] = useState(Date.now());
 
       useEffect(() => {
         if (props.childData) {
-
           const { childCount = 0 } = props.childData;
           updateCount(childCount + count);
         }
