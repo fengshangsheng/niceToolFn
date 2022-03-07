@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
-import { IKeyVal, IComponentProps, IPopupItem } from './interfac';
+import { IKeyVal, IComponentProps, IPopupItem, IPopupComponent } from './interfac';
 import './style.less';
 
 const _PopupList: IPopupItem[] = []
@@ -27,42 +27,36 @@ const PopupGroup = () => {
   useEffect(() => {ForcedRefresh = () => UpdateRefresh(Date.now());});
   useEffect(() => UpdatePopupList([..._PopupList]), [Refresh]);
 
-  return (
-    <>
-      <CSSTransition in={PopupList.length !== 0} timeout={300} classNames="nicetoolfnPopupMask">
-        <div className="nicetoolfn-mask"/>
-      </CSSTransition>
-      <TransitionGroup>
-        {PopupList.map((Item, index) => {
-          const Component = Item.component;
-          const props = Object.assign({
-            key: index,
-            childData: PopupList[index].childData,
-            closePopup: () => ClosePopup(index, 1),
-            closeAllPopup: () => ClosePopup(0),
-          }, index === 0 ? {} : {
-            emit: (data: IKeyVal) => Emit(data, index - 1),
-          });
-          return (
-            <CSSTransition key={Item.id} timeout={300} classNames="nicetoolfnPopupItem">
-              <Component {...props}/>
-            </CSSTransition>
-          )
-        })}
-      </TransitionGroup>
-    </>);
-}
-
-const Render = (root: HTMLElement) => {
-  ReactDOM.render(<PopupGroup/>, root);
+  return (<>
+    <CSSTransition in={PopupList.length !== 0} timeout={300} classNames="nicetoolfnPopupMask">
+      <div className="nicetoolfn-mask"/>
+    </CSSTransition>
+    <TransitionGroup>
+      {PopupList.map((Item, index) => {
+        const Component = Item.component;
+        const props: IComponentProps = Object.assign({
+          key: index,
+          childData: PopupList[index].childData,
+          closePopup: () => ClosePopup(index, 1),
+          closeAllPopup: () => ClosePopup(0),
+          emit: (data: IKeyVal) => index !== 0 && Emit(data, index - 1)
+        });
+        return (
+          <CSSTransition key={Item.id} timeout={300} classNames="nicetoolfnPopupItem">
+            <Component {...props}/>
+          </CSSTransition>
+        )
+      })}
+    </TransitionGroup>
+  </>);
 }
 
 /**
- * @param {React.SFC<IComponentProps>} Component 函数组件或组件实例
+ * @param {IPopupComponent} Component 函数组件或组件实例
  * */
 export default class Index {
   constructor(
-    public Component: React.SFC<IComponentProps>
+    public Component: IPopupComponent
   ) {
     this.Init();
   };
@@ -72,11 +66,8 @@ export default class Index {
   private Init() {
     let DOM = document.getElementById('nicetoolfn-modal');
 
-    _PopupList.push({
-      id: Date.now(),
-      component: this.Component,
-      childData: {}
-    });
+    _PopupList.push({ id: Date.now(), component: this.Component, childData: {} });
+
     if (DOM == null) {
       DOM = document.createElement('div');
       DOM.setAttribute('id', 'nicetoolfn-modal');
@@ -84,7 +75,7 @@ export default class Index {
 
       this.Root = DOM;
 
-      Render(this.Root);
+      ReactDOM.render(<PopupGroup/>, this.Root);
     } else {
       ForcedRefresh();
     }

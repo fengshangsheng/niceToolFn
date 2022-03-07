@@ -50,12 +50,30 @@ const App = () => {
       )
     })
   }
+  const handlePopup3 = () => {
+    const Compoent = (props) => {
+      return (
+        <div className='modal'>
+          <h1>Compoent</h1>
+          <strong>{props.title}</strong>
+          {props.children}
+        </div>
+      )
+    }
+    new Popup((props) => <Compoent title={'fengfeng123'} {...props}>
+      <h1>fengfeng123</h1>
+      <h2>哇哈哈哈</h2>
+      <h3>~~~~~</h3>
+    </Compoent>)
+  }
+
 
   return (
     <div>
       <Thing/>
       <button onClick={() => handleModal()}>click1</button>
       <button onClick={() => handlePopup()}>click2</button>
+      <button onClick={() => handlePopup3()}>click3</button>
 
     </div>
   );

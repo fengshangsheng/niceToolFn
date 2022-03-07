@@ -13,7 +13,7 @@ module.exports = {
           }),
         ],
         inject: false,
-        extract: 'react-easy-popup.min.css',
+        extract: 'nicetoolfn.css',
       })
     );
     return config;

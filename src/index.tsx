@@ -1,5 +1,4 @@
 import * as React from 'react';
-import './index.less';
 
 import Modal from './components/Modal'
 import Popup from './components/Popup'

@@ -7,10 +7,20 @@ export interface IComponentProps {
   closeAllPopup: Function
   emit: (data: IKeyVal) => void
   childData: IKeyVal
+
+  [key: string]: any
 }
 
 export interface IPopupItem {
   id: number
-  component: React.SFC<any>
+  component: IPopupComponent
   childData: object
+}
+
+export interface IPopupComponent {
+  (props: IComponentProps): JSX.Element;
+
+  // <IComponentProps>(
+  //   element: ReactElement<IComponentProps>
+  // ): Component<IComponentProps> | Element | void;
 }
