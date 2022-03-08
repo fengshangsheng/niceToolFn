@@ -1,26 +1,22 @@
+import React, { ReactElement } from "react";
+
 export interface IKeyVal {
   [key: string]: any
 }
 
 export interface IComponentProps {
-  closePopup: Function
-  closeAllPopup: Function
-  emit: (data: IKeyVal) => void
-  childData: IKeyVal
+  closePopup: () => void;
+  closeAllPopup: () => void;
+  emit: (data: IKeyVal) => void;
+  childData: IKeyVal;
 
-  [key: string]: any
+  [key: string]: any;
 }
 
 export interface IPopupItem {
-  id: number
-  component: IPopupComponent
-  childData: object
+  id: number;
+  childData: IKeyVal;
+  component: IComponent;
 }
 
-export interface IPopupComponent {
-  (props: IComponentProps): JSX.Element;
-
-  // <IComponentProps>(
-  //   element: ReactElement<IComponentProps>
-  // ): Component<IComponentProps> | Element | void;
-}
+export type IComponent = React.JSXElementConstructor<any>; // (props: IComponentProps) => JSX.Element | ReactElement<any, any> ;

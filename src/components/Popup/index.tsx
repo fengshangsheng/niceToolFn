@@ -1,49 +1,65 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
-import { IKeyVal, IComponentProps, IPopupItem, IPopupComponent } from './interfac';
+import { IKeyVal, IComponentProps, IPopupItem, IComponent } from './interfac';
+// import Uitls from './../../uitls';
 import './style.less';
 
-const _PopupList: IPopupItem[] = []
+const POPUP_LIST: IPopupItem[] = []
+let forcedRefresh: Function = function () {};
 
-let ForcedRefresh: Function = function () {};
+function PopupGroup() {
+  const [refresh, updateRefresh] = useState(0);
+  const [popupList, updatePopupList] = useState<IPopupItem[]>([]);
 
-const PopupGroup = () => {
-  const [Refresh, UpdateRefresh] = useState(0);
-  const [PopupList, UpdatePopupList]: [IPopupItem[], Function] = useState([]);
-  const ClosePopup = (index: number, size: number = PopupList.length) => {
-    PopupList.splice(index, size);
-    _PopupList.splice(index, size);
-    UpdatePopupList([...PopupList]);
+  const ClosePopup = (index: number, size: number = popupList.length) => {
+    popupList.splice(index, size);
+    POPUP_LIST.splice(index, size);
+    updatePopupList([...popupList]);
   }
   const Emit = (data: IKeyVal, parentIdx: number) => {
-    PopupList[parentIdx].childData = {
-      ...PopupList[parentIdx].childData,
+    popupList[parentIdx].childData = {
+      ...popupList[parentIdx].childData,
       ...data
     };
-    UpdatePopupList([...PopupList]);
+    updatePopupList([...popupList]);
   }
 
-  useEffect(() => {ForcedRefresh = () => UpdateRefresh(Date.now());});
-  useEffect(() => UpdatePopupList([..._PopupList]), [Refresh]);
+  useEffect(() => {
+    updatePopupList([...POPUP_LIST]);
+  }, [refresh]);
+  useEffect(() => {
+    forcedRefresh = () => updateRefresh(Date.now());
+  });
 
   return (<>
-    <CSSTransition in={PopupList.length !== 0} timeout={300} classNames="nicetoolfnPopupMask">
+    <CSSTransition in={popupList.length !== 0} timeout={300} classNames="nicetoolfnPopupMask">
       <div className="nicetoolfn-mask"/>
     </CSSTransition>
     <TransitionGroup>
-      {PopupList.map((Item, index) => {
-        const Component = Item.component;
-        const props: IComponentProps = Object.assign({
-          key: index,
-          childData: PopupList[index].childData,
+      {popupList.map((Item, index) => {
+        let Component = Item.component;
+        const Props: IComponentProps = {
+          childData: popupList[index].childData,
           closePopup: () => ClosePopup(index, 1),
           closeAllPopup: () => ClosePopup(0),
           emit: (data: IKeyVal) => index !== 0 && Emit(data, index - 1)
-        });
+        };
+        console.log('React.isValidElement(Component)', React.isValidElement(Component));
+        React.isValidElement(Component) && React.Children.map((Component as React.ReactElement<IComponentProps>).props.children, (item) => {
+          console.log(item);
+        })
         return (
-          <CSSTransition key={Item.id} timeout={300} classNames="nicetoolfnPopupItem">
-            <Component {...props}/>
+          <CSSTransition key={index} timeout={300} classNames="nicetoolfnPopupItem">
+            <div>
+              {React.isValidElement(Component) ?
+                React.Children.map((Component as React.ReactElement<IComponentProps>).props.children, (item) => {
+                  const Item = React.cloneElement(item);
+                  return <>{Item}</>
+                })
+                : <Component  {...Props}/>
+              }
+            </div>
           </CSSTransition>
         )
       })}
@@ -55,29 +71,25 @@ const PopupGroup = () => {
  * @param {IPopupComponent} Component 函数组件或组件实例
  * */
 export default class Index {
-  constructor(
-    public Component: IPopupComponent
-  ) {
-    this.Init();
+  constructor(public component: IComponent) {
+    console.log('component', component);
+    this.init();
   };
 
-  private Root: HTMLElement | null = null;
+  private root: HTMLElement | null = document.getElementById('nicetoolfn-modal');
 
-  private Init() {
-    let DOM = document.getElementById('nicetoolfn-modal');
+  private init() {
+    POPUP_LIST.push({ id: Date.now(), component: this.component, childData: {} });
 
-    _PopupList.push({ id: Date.now(), component: this.Component, childData: {} });
+    if (this.root == null) {
+      this.root = document.createElement('div');
+      this.root.setAttribute('id', 'nicetoolfn-modal');
+      document.body.appendChild(this.root);
 
-    if (DOM == null) {
-      DOM = document.createElement('div');
-      DOM.setAttribute('id', 'nicetoolfn-modal');
-      document.body.appendChild(DOM);
-
-      this.Root = DOM;
-
-      ReactDOM.render(<PopupGroup/>, this.Root);
+      ReactDOM.render(<PopupGroup/>, this.root);
     } else {
-      ForcedRefresh();
+      forcedRefresh();
     }
   }
 }
+

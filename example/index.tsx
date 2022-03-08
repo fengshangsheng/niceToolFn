@@ -2,7 +2,7 @@ import 'react-app-polyfill/ie9';
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { Thing, Modal, Popup } from '../dist'; // 此处存在parcel alias 见下文
-import '../dist/react-easy-popup.min.css';
+import '../dist/nicetoolfn.css';
 import './index.less';
 
 const App = () => {
