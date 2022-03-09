@@ -6,21 +6,6 @@ import '../dist/nicetoolfn.css';
 import './index.less';
 
 const App = () => {
-  const handleModal = () => {
-    const modal = new Modal((props) => {
-      const [count, updateCount] = useState(0);
-      return (
-        <div data-xxx={'cacsac'}>
-          <h1>count:{count}
-            <button onClick={() => updateCount(count + 1)}>add a</button>
-            <button onClick={() => handleModal()}>open</button>
-
-            <button onClick={() => modal.closeModal()}>close modal</button>
-          </h1>
-        </div>
-      )
-    })
-  }
   const handlePopup = () => {
     new Popup((props) => {
       const [count, updateCount] = useState(0);
@@ -50,30 +35,59 @@ const App = () => {
       )
     })
   }
-  const handlePopup3 = () => {
+  const handlePopup2 = () => {
     const Compoent = (props) => {
       return (
         <div className='modal'>
           <h1>Compoent</h1>
-          <strong>{props.title}</strong>
-          {props.children}
+          <h2>props.title：{props.title}</h2>
+          <p>props.children:{props.children}</p>
         </div>
       )
     }
-    new Popup((props) => <Compoent title={'fengfeng123'} {...props}>
-      <h1>fengfeng123</h1>
-      <h2>哇哈哈哈</h2>
-      <h3>~~~~~</h3>
+    new Popup(<Compoent title={'fengfeng123'}>
+      <span>1111111111</span>
+      {(props) => {
+        return <button onClick={() => props.closePopup()}>close</button>
+      }
+      }
+      <strong>22222222222</strong>
+      44444444
     </Compoent>)
+  }
+  const handlePopup3 = () => {
+    const name = [1, 2, 3, 4, 5];
+    new Popup(<div>
+      feng
+      {(props) => {
+        const [count, update] = useState(0);
+        return <div>
+          <h1>aaaa</h1>
+          <button onClick={() => props.closePopup()}>close</button>
+          <h2>bbbbb</h2>
+          <button onClick={() => handlePopup3()}>open</button>
+          {name.length && name.map(item => item)}
+          <button onClick={() => update(count + 1)}>add count</button>{count}
+        </div>
+      }}
+      {props => {
+        return <p>{props.childData.childCount}</p>
+      }}
+      {props => <button onClick={() => {
+        props.emit({ childCount: (props.childData.childCount || 0) + 1 });
+        props.closePopup();
+      }}>emit 1</button>}
+      shang
+    </div>)
   }
 
 
   return (
     <div>
       <Thing/>
-      <button onClick={() => handleModal()}>click1</button>
-      <button onClick={() => handlePopup()}>click2</button>
-      <button onClick={() => handlePopup3()}>click3</button>
+      <button onClick={() => handlePopup()}>click function</button>
+      <button onClick={() => handlePopup2()}>click component</button>
+      <button onClick={() => handlePopup3()}>click jsx</button>
 
     </div>
   );

@@ -1,23 +1,51 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
-import { IKeyVal, IComponentProps, IPopupItem, IComponent } from './interfac';
-// import Uitls from './../../uitls';
+import { IKeyVal, IPopupItem, IComponent, IComponentProps } from './interfac';
 import './style.less';
 
 const POPUP_LIST: IPopupItem[] = []
 let forcedRefresh: Function = function () {};
 
+function recursionChildren(element: any, props: IKeyVal): any {
+  const children = element.props.children;
+  const switchChildren = (children: any): any => {
+    if (typeof children === 'string' || typeof children === 'number') {
+      return children;
+    }
+    if (children instanceof Array) {
+      return React.Children.map(
+        children.map((item) => item instanceof Function ? item(props) : item),
+        (item) => switchChildren(item)
+      )
+    }
+    if (children instanceof Function) {
+      return children(props);
+    }
+    if (children instanceof Object) {
+      return children
+    }
+    return children
+  }
+  return React.cloneElement(
+    element,
+    { ...element.props },
+    children ?
+      switchChildren(children)
+      : []
+  );
+}
+
 function PopupGroup() {
   const [refresh, updateRefresh] = useState(0);
   const [popupList, updatePopupList] = useState<IPopupItem[]>([]);
 
-  const ClosePopup = (index: number, size: number = popupList.length) => {
+  const closePopup = (index: number, size: number = popupList.length) => {
     popupList.splice(index, size);
     POPUP_LIST.splice(index, size);
     updatePopupList([...popupList]);
   }
-  const Emit = (data: IKeyVal, parentIdx: number) => {
+  const emit = (data: IKeyVal, parentIdx: number) => {
     popupList[parentIdx].childData = {
       ...popupList[parentIdx].childData,
       ...data
@@ -37,29 +65,22 @@ function PopupGroup() {
       <div className="nicetoolfn-mask"/>
     </CSSTransition>
     <TransitionGroup>
-      {popupList.map((Item, index) => {
-        let Component = Item.component;
-        const Props: IComponentProps = {
+      {popupList.map((item, index) => {
+        const props: IComponentProps = {
           childData: popupList[index].childData,
-          closePopup: () => ClosePopup(index, 1),
-          closeAllPopup: () => ClosePopup(0),
-          emit: (data: IKeyVal) => index !== 0 && Emit(data, index - 1)
+          closePopup: () => closePopup(index, 1),
+          closeAllPopup: () => closePopup(0),
+          forcedRefresh: () => forcedRefresh(),
+          emit: (data: IKeyVal) => index !== 0 && emit(data, index - 1)
         };
-        console.log('React.isValidElement(Component)', React.isValidElement(Component));
-        React.isValidElement(Component) && React.Children.map((Component as React.ReactElement<IComponentProps>).props.children, (item) => {
-          console.log(item);
-        })
+
+        let Component: any = item.component;
+        Component = React.isValidElement(item.component) ?
+          recursionChildren(item.component, { ...item.component.props, ...props })
+          : React.cloneElement(<Component/>, props);
         return (
           <CSSTransition key={index} timeout={300} classNames="nicetoolfnPopupItem">
-            <div>
-              {React.isValidElement(Component) ?
-                React.Children.map((Component as React.ReactElement<IComponentProps>).props.children, (item) => {
-                  const Item = React.cloneElement(item);
-                  return <>{Item}</>
-                })
-                : <Component  {...Props}/>
-              }
-            </div>
+            {Component}
           </CSSTransition>
         )
       })}
@@ -72,14 +93,13 @@ function PopupGroup() {
  * */
 export default class Index {
   constructor(public component: IComponent) {
-    console.log('component', component);
     this.init();
   };
 
   private root: HTMLElement | null = document.getElementById('nicetoolfn-modal');
 
   private init() {
-    POPUP_LIST.push({ id: Date.now(), component: this.component, childData: {} });
+    POPUP_LIST.push({ component: this.component, childData: {} });
 
     if (this.root == null) {
       this.root = document.createElement('div');
