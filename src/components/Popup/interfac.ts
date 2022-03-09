@@ -1,4 +1,4 @@
-import React, { CElement, FunctionComponent } from "react";
+import React from "react";
 
 export interface IKeyVal {
   [key: string]: any
@@ -19,4 +19,4 @@ export interface IPopupItem {
   component: IComponent;
 }
 
-export type IComponent = React.FC<IComponentProps> | React.ReactElement<IComponentProps>;
+export type IComponent = React.FC<IComponentProps>;
