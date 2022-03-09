@@ -1,14 +1,7 @@
-import * as React from 'react';
-
-import Modal from './components/Modal'
-import Popup from './components/Popup'
-
-const Thing = () => (
-  <div className="react-easy-popup">hello,react-easy-popup</div>
-);
+import Popup from './components/Popup';
+import { Cookie } from './uitls';
 
 export {
-  Thing,
-  Modal,
-  Popup
+  Popup,
+  Cookie
 };

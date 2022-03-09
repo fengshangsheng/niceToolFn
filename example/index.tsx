@@ -1,7 +1,7 @@
 import 'react-app-polyfill/ie9';
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { Thing, Popup } from '../dist'; // 此处存在parcel alias 见下文
+import { Popup, Cookie } from '../dist'; // 此处存在parcel alias 见下文
 import '../dist/nicetoolfn.css';
 import './index.less';
 
@@ -31,15 +31,17 @@ const App = () => {
             props.emit({ childCount: count })
           }}>emit
           </button>
+          <button onClick={() => update(count)}>popup one emit data</button>
         </div>
       )
     })
   }
 
+  Cookie.set('fengfeng123', 'xxxxxxxxxx');
+  console.log(Cookie.get('fengfeng123'));
 
   return (
     <div>
-      <Thing/>
       <p>data:{data}</p>
 
       <button onClick={() => handlePopup()}>click function</button>
