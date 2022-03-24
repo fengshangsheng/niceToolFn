@@ -1,7 +1,10 @@
 import Popup from './components/Popup';
-import { Cookie } from './uitls';
+import { Cookie, CountDown } from './uitls';
+import { usePages } from './hook';
 
 export {
   Popup,
-  Cookie
+  Cookie,
+  CountDown,
+  usePages
 };

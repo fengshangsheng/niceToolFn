@@ -5,10 +5,10 @@ export interface IKeyVal {
 }
 
 export interface IComponentProps {
-  closePopup: () => void;
-  closeAllPopup: () => void;
-  emit: (data: IKeyVal) => void;
-  forcedRefresh: () => void;
+  readonly closePopup: () => void;
+  readonly closeAllPopup: () => void;
+  readonly emit: (data: IKeyVal) => void;
+  readonly forcedRefresh: () => void;
   childData: IKeyVal;
 
   [key: string]: any;
