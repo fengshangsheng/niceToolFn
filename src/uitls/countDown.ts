@@ -40,19 +40,16 @@ export default class CountDown {
   private init() {
     let diffTime = new Date(this.endTime).getTime() - Date.now();
 
-    if (diffTime <= 0) {
-      this.option.callback && this.option.callback(this.getReturnTime());
-      return;
-    }
-
     this.computedTime(diffTime);
 
     this.option.callback && this.option.callback(this.getReturnTime());
 
-    this._time && clearTimeout(this._time);
-    this._time = setTimeout(() => {
-      this.init();
-    }, 1000);
+    if (diffTime > 0) {
+      this._time && clearTimeout(this._time);
+      this._time = setTimeout(() => {
+        this.init();
+      }, 1000);
+    }
   }
 
   private computedTime(time: number) {
