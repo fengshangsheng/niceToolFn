@@ -1,5 +1,5 @@
 interface IOption {
-  callback: (res: IReturn) => any;
+  callback: (res: IReturn | false) => any;
   day?: boolean;
   hour?: boolean;
   minute?: boolean;
@@ -14,16 +14,21 @@ interface IReturn {
 }
 
 export default class CountDown {
-  constructor(public endTime: string, public option: IOption) {
+  constructor(public endTime: string | number, public option: IOption) {
     this.init();
   }
 
+  private _time: NodeJS.Timeout | undefined;
   private day = 0;
   private hour = 0;
   private minute = 0;
   private milli = 0;
 
-  private getReturnTime(): IReturn {
+  private getReturnTime(): IReturn | false {
+    if (this.day === 0 && this.hour === 0 && this.minute === 0 && this.milli === 0) {
+      return false;
+    }
+
     const obj: IReturn = {}
     this.option.day && (obj['day'] = String(this.day).padStart(2, '0'));
     this.option.hour && (obj['hour'] = String(this.hour).padStart(2, '0'));
@@ -35,7 +40,7 @@ export default class CountDown {
   private init() {
     let diffTime = new Date(this.endTime).getTime() - Date.now();
 
-    if (diffTime < 0) {
+    if (diffTime <= 0) {
       this.option.callback && this.option.callback(this.getReturnTime());
       return;
     }
@@ -44,7 +49,8 @@ export default class CountDown {
 
     this.option.callback && this.option.callback(this.getReturnTime());
 
-    setTimeout(() => {
+    this._time && clearTimeout(this._time);
+    this._time = setTimeout(() => {
       this.init();
     }, 1000);
   }
@@ -63,7 +69,11 @@ export default class CountDown {
       time = time % (60 * 1000);
     }
     if (this.option.milli === true) {
-      this.milli = parseInt(time / 1000 + '');
+      this.milli = time <= 0 ? 0 : parseInt(time / 1000 + '');
     }
+  }
+
+  public stopCountDown() {
+    this._time && clearTimeout(this._time);
   }
 }
