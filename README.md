@@ -1,9 +1,12 @@
 `npm install --save nicetoolfn`
 
-### 🔥 Popup---弹窗
+<details>
+<summary style="font-size: 18px; font-weight: bold">🔥 Popup---弹窗</summary>
+<pre style="padding: 0;font-size: 14px;background-color: transparent;">
 
 ```javascript
 import { Popup } from 'nicetoolfn';
+import 'nicetoolfn/dist/nicetoolfn.css'
 
 /**
  * @param props {
@@ -43,7 +46,12 @@ new Popup((props) => {
 });
 ```
 
-### 🔥 CountDown---倒计时
+</pre>
+</details>
+
+<details>
+<summary style="font-size: 18px; font-weight: bold">🔥 CountDown---倒计时</summary>
+<pre style="padding: 0;font-size: 14px;background-color: transparent;">
 
 ```javascript
 import { CountDown } from 'nicetoolfn';
@@ -63,7 +71,11 @@ const target = new CountDown(
 target.stopCountDown(); // 拿到实例后，停止倒计时
 ```
 
-### 🔥 usePages---分页
+</pre>
+</details> 
+<details>
+<summary style="font-size: 18px; font-weight: bold">🔥 usePages---分页</summary>
+<pre style="padding: 0;font-size: 14px;background-color: transparent;">
 
 ```javascript
 import { usePages } from 'nicetoolfn'
@@ -78,3 +90,6 @@ const [
   list // 总列表数据
 );
 ```
+
+</pre>
+</details>  
