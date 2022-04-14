@@ -1,30 +1,29 @@
-interface IOption {
+type IOption = {
   callback: (res: IReturn | false) => any;
   day?: boolean;
   hour?: boolean;
   minute?: boolean;
   milli?: boolean;
 }
-
-interface IReturn {
+type IReturn = {
   day?: string
   hour?: string
   minute?: string
   milli?: string
-}
+} | false
 
 export default class CountDown {
-  constructor(public endTime: string | number, public option: IOption) {
-    this.init();
-  }
-
   private _time: NodeJS.Timeout | undefined;
   private day = 0;
   private hour = 0;
   private minute = 0;
   private milli = 0;
 
-  private getReturnTime(): IReturn | false {
+  constructor(public endTime: string | number, public option: IOption) {
+    this.init();
+  }
+
+  private getReturnTime(): IReturn {
     if (this.day === 0 && this.hour === 0 && this.minute === 0 && this.milli === 0) {
       return false;
     }
@@ -70,7 +69,11 @@ export default class CountDown {
     }
   }
 
-  public stopCountDown() {
+  public stop() {
     this._time && clearTimeout(this._time);
+  }
+
+  public play() {
+    this.init();
   }
 }

@@ -1,52 +1,36 @@
 import 'react-app-polyfill/ie9';
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { Popup, Cookie } from '../dist'; // 此处存在parcel alias 见下文
+import { LoopFrames } from '../dist'; // 此处存在parcel alias 见下文
 import '../dist/nicetoolfn.css';
 import './index.less';
 
-const App = () => {
-  const [data, update] = useState(0);
-  const handlePopup = () => {
-    new Popup((props) => {
-      const [count, updateCount] = useState(0);
-      const [data] = useState(Date.now());
 
-      useEffect(() => {
-        const { childCount = 0 } = props.childData;
-        updateCount(childCount + count);
-        update(childCount + count);
-      }, [props.childData]);
-      return (
-        <div className='modal'>
-          <h1>{data}</h1>
-
-          count:{count}
-          <button onClick={() => updateCount(count + 1)}>click</button>
-          <button onClick={() => handlePopup()}>open</button>
-          <button onClick={() => props.closePopup()}>close</button>
-          <button onClick={() => props.closeAllPopup()}>closeAll</button>
-          <button onClick={() => {
-            props.closePopup()
-            props.emit({ childCount: count })
-          }}>emit
-          </button>
-          <button onClick={() => update(count)}>popup one emit data</button>
-        </div>
-      )
-    })
-  }
-
-  Cookie.set('fengfeng123', 'xxxxxxxxxx');
-  console.log(Cookie.get('fengfeng123'));
-
-  return (
-    <div>
-      <p>data:{data}</p>
-
-      <button onClick={() => handlePopup()}>click function</button>
-    </div>
-  );
+const App = () => { 
+  return <div>
+    <h1>123</h1>
+    <LoopFrames
+      className={'xxxxx'}
+      frames={[
+      'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00000.png',
+      'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00001.png',
+      'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00002.png',
+      'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00003.png',
+      'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00004.png',
+      'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00005.png',
+      'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00006.png',
+      'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00007.png',
+      'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00008.png',
+      'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00009.png',
+      'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00010.png',
+      'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00011.png',
+      'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00012.png',
+      'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00013.png'
+    ]}
+      pace={120}
+      style={({width:'100px'})}
+    />
+  </div>
 };
 
 ReactDOM.render(<App/>, document.getElementById('root'));

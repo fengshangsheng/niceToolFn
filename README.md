@@ -1,5 +1,6 @@
 `npm install --save nicetoolfn`
 
+### 方法
 <details>
 <summary style="font-size: 18px; font-weight: bold">🔥 Popup---弹窗</summary>
 <pre style="padding: 0;font-size: 14px;background-color: transparent;">
@@ -72,7 +73,9 @@ target.stopCountDown(); // 拿到实例后，停止倒计时
 ```
 
 </pre>
-</details> 
+</details>
+
+### hooks
 <details>
 <summary style="font-size: 18px; font-weight: bold">🔥 usePages---分页</summary>
 <pre style="padding: 0;font-size: 14px;background-color: transparent;">
@@ -93,3 +96,30 @@ const [
 
 </pre>
 </details>  
+
+### 组件
+<details>
+<summary style="font-size: 18px; font-weight: bold">🔥 LoopFrames---帧动画</summary>
+<pre style="padding: 0;font-size: 14px;background-color: transparent;">
+
+```javascript
+import { LoopFrames } from 'nicetoolfn'
+
+function App(){
+  return (
+    <LoopFrames
+      frames={[
+        'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00000.png',
+        'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00001.png',
+        'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00002.png'
+      ]}
+      pace={120}
+      style={({width:'100px'})}
+    />    
+  )
+}
+```
+
+</pre>
+</details>
+
