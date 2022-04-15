@@ -15,7 +15,7 @@ const usePages = function <T>(pageSize: number, list: T[]) {
   }
 
   useEffect(() => {
-    const arr = list.slice((pageIdx-1) * pageSize, pageIdx * pageSize)
+    const arr = list.slice((pageIdx - 1) * pageSize, pageIdx * pageSize)
     updateTable(arr);
   }, [pageIdx, pageSize, list]);
 

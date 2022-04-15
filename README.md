@@ -113,8 +113,8 @@ function App(){
         'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00001.png',
         'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00002.png'
       ]}
-      pace={120}
-      style={({width:'100px'})}
+      pace={120} // 帧切换速率
+      className={'myclass'}
     />    
   )
 }

@@ -32,9 +32,10 @@ export default function (props: IProps) {
       target = new Animate(() => {
         const newFrame = _refFrame.current + 1;
         updateFrame(newFrame > props.frames.length - 1 ? 0 : newFrame)
-      }, props.pace);
+      }, props.pace || 60);
+      target.playLoop();
     }
-    return () => target && target.stop()
+    return () => target?.stop()
   }, [hasLoadEnd]);
 
   useEffect(() => {
@@ -43,8 +44,9 @@ export default function (props: IProps) {
 
   return <ul className={`loopFrames ${props.className}`}>
     {props.frames.map((item, index) => (
-      <li className={frame === index ? '' : 'disNone'} key={index}>
+      <li key={index}>
         <img src={item} alt=""
+             className={frame === index ? '' : 'disNone'}
              onLoad={() => updateLoaded(index)}
              onError={() => {updateLoaded(index)}}
         />
