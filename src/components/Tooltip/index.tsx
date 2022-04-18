@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from "react-dom";
 import Animate from './../../helpers/requestAnimationFrame';
+import { useTransition } from "./../../hook/index";
 import './style.less';
 
 type EPlacement = 'left' | 'top' | 'right' | 'bottom' | 'center';
@@ -63,10 +64,10 @@ function computeOffset(direction: EPlacement[], targetOffset: IOffset, floatOffs
   floatOffset.top = targetOffset.top;
 
   if (direction.length !== 0 && direction[0] === direction[1]) {
-    throw new Error('nicetoolfn=>Tooltip=>placement:位置不允许重复')
+    throw new Error('nicetoolfn => Tooltip => placement:位置不允许重复')
   }
   if (direction[0] === 'center') {
-    throw new Error('nicetoolfn=>Tooltip=>placement:["center"]不可为数组索引0的值')
+    throw new Error('nicetoolfn => Tooltip => placement:["center"]不可为数组索引0的值')
   }
   if (direction[0] !== undefined && [1] === undefined) {
     direction[1] = 'center'
@@ -115,6 +116,12 @@ function computeOffset(direction: EPlacement[], targetOffset: IOffset, floatOffs
   return floatOffset
 }
 
+function CloneElement(props: any) {
+  const { children, ..._props } = props;
+  console.log(children, _props);
+  return React.createElement(() => <>{children}</>);
+}
+
 export default function (props: IProps) {
   const [target, float] = React.Children.toArray(props.children);
   const [show, updateShow] = useState<boolean>(false);
@@ -129,6 +136,16 @@ export default function (props: IProps) {
       return div
     })();
   }, []);
+  const [style, styleTime, styleTrigger] = useTransition([
+    [0, {
+      opacity: 0,
+      transform: 'scale(0)'
+    }],
+    [1000, {
+      opacity: 1,
+      transform: 'scale(1)'
+    }]
+  ], 0);
 
   const TargetDiv = useMemo(() => React.forwardRef((_props, ref) => {
     // @ts-ignore
@@ -179,7 +196,12 @@ export default function (props: IProps) {
       }
     }[trigger] || {}
     const newStyle = { ...style, ..._props.style }
-    return React.cloneElement(float as React.ReactElement, { ..._props, ...event, ref, style: newStyle })
+    return React.cloneElement(float as React.ReactElement, {
+      ..._props,
+      ...event,
+      ref,
+      style: newStyle
+    })
   }), [float]);
 
   const scrollAnimate = useMemo<Animate>(() => {
@@ -195,9 +217,13 @@ export default function (props: IProps) {
     }, 0);
   }, [props.placement]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     _refShow.current = show;
-    show && scrollAnimate.play();
+    if (show) {
+      scrollAnimate.play();
+    }
+    console.log('Number(show)', Number(show));
+    styleTrigger(Number(show))
   }, [show])
   useEffect(() => {
     window.addEventListener('scroll', () => {
@@ -209,15 +235,23 @@ export default function (props: IProps) {
     });
     return () => window.removeEventListener('scroll', () => {});
   }, [])
-
+  console.log('style~~~~~~~~~', style);
   return <>
     {<TargetDiv ref={_refTargetDiv}/>}
+    <CloneElement>
+      {target}
+    </CloneElement>
+    <CloneElement>
+      {float}
+    </CloneElement>
+
     {String(show)}
-    {show && ReactDOM.createPortal(<FloatDiv
+    {ReactDOM.createPortal(<FloatDiv
       ref={_refFloatDiv}
       style={({
         position: 'fixed',
-        transition: 'all 0.3s'
+        transition: `all ${styleTime}ms`,
+        ...style
       })}
     />, root)}
   </>

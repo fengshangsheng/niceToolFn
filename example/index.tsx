@@ -9,7 +9,6 @@ import './index.less';
 const App = () => {
   const [count, updateShow] = useState(0);
   const handleEv = () => {
-    console.log('show', count);
     updateShow(count+1);
   }
 
