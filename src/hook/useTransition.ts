@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-// import Animate from './../helpers/requestAnimationFrame';
+import { useLayoutEffect, useState } from "react";
 
 type TKeyVal = { [key: string]: any }
 type TReturn = [TKeyVal, number, Function, number];
@@ -10,31 +9,33 @@ const useTransition = function (list: TList[], active: number): TReturn {
 
   const trigger = (pointer: number) => {
     let newStep: number;
-    if (typeof pointer !== undefined) {
+    if (typeof pointer === 'undefined') {
+      newStep = step === list.length - 1 ? 0 : step + 1;
+    } else {
       if (pointer > list.length || pointer < 0) {
         throw new Error('nicetoolfn => Tooltip => pointer:阙值错误,pointer不可超过数组length');
       }
       newStep = pointer;
-    } else {
-      newStep = step === list.length - 1 ? 0 : step + 1;
     }
-    console.log('newStep', newStep);
     updateStep(newStep);
   }
 
-  useEffect(() => {
-    const [, style] = list[step];
+  useLayoutEffect(() => {
+    const [time, style] = list[step];
 
-    // style['transition'] = Object.keys(style).map((item) => {
-    //   if (item == 'transition') {
-    //     throw new Error('nicetoolfn => useTransitions => 不可输入:transition');
-    //   }
-    //   return `${item} ${time}ms`
-    // }).join(',');
-    //
-    // console.log('useEffect style', style);
-    updateItem(style);
-  }, [step])
+    const transition = Object.keys(style).map((item) => {
+      if (item == 'transition') {
+        throw new Error('nicetoolfn => useTransitions => 不可输入:transition');
+      }
+      return `${item} ${time}ms`
+    }).join(',');
+
+    updateItem({
+      transition,
+      ...style
+    });
+  }, [step]);
+
   return [item, list[step][0], trigger, step];
 }
 

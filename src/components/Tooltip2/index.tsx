@@ -1,15 +1,12 @@
-import React, { useEffect, useMemo, useRef } from 'react';
-// import ReactDOM from "react-dom";
-// import Animate from './../../helpers/requestAnimationFrame';
-// import { useTransition } from "./../../hook/index";
-import './style.less';
+import React, {  useLayoutEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from "react-dom";
+import Animate from './../../helpers/requestAnimationFrame';
+import { useTransition } from "./../../hook/index";
+import './style.less';
 
 type EPlacement = 'left' | 'top' | 'right' | 'bottom' | 'center';
 type EEventType = 'click' | 'mouse'
 type IOffset = {
-  x: number
-  y: number
   left: number
   top: number
   right: number
@@ -18,11 +15,14 @@ type IOffset = {
   height: number
 }
 type IProps = {
-  trigger: EEventType // 事件触发类型
-  popup: React.ReactNode // 提示组件
-  placement?: EPlacement[] // 提示方位
+  children: React.ReactElement[]
+  trigger: EEventType
+  placement?: EPlacement[]
+  className?: string
   [key: string]: any
 }
+
+let mouseCanceller: NodeJS.Timeout;
 
 // 当未配置[placement]时,根据当前屏幕相对位置,进行默认定位
 function autoDirection(targetOffset: IOffset): EPlacement[] {
@@ -116,80 +116,121 @@ function computeOffset(direction: EPlacement[], targetOffset: IOffset, floatOffs
   return floatOffset
 }
 
-console.log(computeOffset);
-
 export default function (props: IProps) {
-  const PopupRoot = useMemo(() => {
+  const [target, float] = React.Children.toArray(props.children);
+  const [show, updateShow] = useState<boolean>(false);
+  const _refShow = useRef(show);
+  const _refTargetDiv = useRef<HTMLElement>();
+  const _refFloatDiv = useRef<HTMLElement>();
+  const root = useMemo(() => {
     return document.getElementById('nicetoolfn-tooltip') || (() => {
       const div = document.createElement('div')
       div.setAttribute('id', 'nicetoolfn-tooltip');
-      div.style.position = 'absolute';
-      div.style.left = '0';
-      div.style.top = '0';
-      div.style.width = '0';
-      div.style.height = '0';
       document.body.appendChild(div);
       return div
     })();
   }, []);
-  const refRoot = useRef<HTMLElement>();
-  const refPopup = useRef<HTMLElement>();
-  const refShow = useRef<Boolean>(false);
+  const [style, styleTime, styleTrigger] = useTransition([
+    [500, {
+      opacity: 0,
+      transform: 'scale(1)'
+    }],
+    [1000, {
+      opacity: 1,
+      transform: 'scale(1)'
+    }]
+  ], 0);
 
-  const Popup = () => {
-    let Component = props.popup;
-    Component = typeof Component === 'function' ? <Component/> : Component;
-    Component = React.createElement('div', {
-      ...(Component as React.ReactElement).props,
-      ref: refPopup
-    }, [Component]);
-    return Component
-  };
-  const Root = () => {
-    let Root = React.Children.only(props.children);
-    const { trigger } = props;
+  const TargetDiv = useMemo(()=>React.forwardRef((_props, ref) => {
+    // @ts-ignore
+    const { onClick } = React.Children.toArray(props.children[0])[0].props;
+    const { children, placement, trigger, ...otherProps } = props;
     const event = {
       click: {
-        onClick: onClickEvent
+        onClick: () => {
+          updateShow(!show)
+          onClick && onClick();
+        }
       },
       mouse: {
         onMouseOver: () => {
+          clearTimeout(mouseCanceller)
+          updateShow(true);
         },
         onMouseLeave: () => {
+          mouseCanceller = setTimeout(() => {
+            updateShow(false);
+          }, 1000)
         }
       }
-    }[trigger];
-
-    Root = React.cloneElement(Root, {
-      ...Root.props,
-      ...event,
-      ref: refRoot
+    }[trigger] || {}
+    return React.cloneElement(target as React.ReactElement, {
+      ...otherProps, ..._props, ...event, ref
+    });
+  }),[props.children[0].props]);
+  const FloatDiv = useMemo(()=>React.forwardRef((_props: any, ref) => {
+    // @ts-ignore
+    const { style } = React.Children.toArray(props.children[1])[0].props;
+    const { trigger } = props;
+    const event = {
+      click: {},
+      mouse: {
+        onMouseOver: () => {
+          clearTimeout(mouseCanceller);
+          updateShow(true)
+        },
+        onMouseLeave: () => {
+          mouseCanceller = setTimeout(() => {
+            updateShow(false)
+          }, 1000);
+        }
+      }
+    }[trigger] || {}
+    const newStyle = { ...style, ..._props.style }
+    return React.cloneElement(float as React.ReactElement, {
+      ..._props, ...event, ref, style: newStyle
     })
+  }),[props.children[1].props]);
 
-    return Root;
-  }
+  const scrollAnimate = useMemo<Animate>(() => {
+    return new Animate(function () {
+      if (!_refTargetDiv.current || !_refFloatDiv.current) {
+        return;
+      }
+      const targetOffset = JSON.parse(JSON.stringify(_refTargetDiv.current!.getBoundingClientRect()));
+      const floatOffset = JSON.parse(JSON.stringify(_refFloatDiv.current!.getBoundingClientRect()));
+      const offset = computeOffset(props.placement || [], targetOffset, floatOffset);
+      _refFloatDiv.current!.style.left = offset.left + 'px';
+      _refFloatDiv.current!.style.top = offset.top + 'px';
+    }, 0);
+  }, [props.placement]);
 
-  const onClickEvent = () => {
-    console.log('refShow', refShow);
-  }
-
-  useEffect(() => {
-    if (!refRoot.current || !refPopup.current) {
-      return;
+  useLayoutEffect(() => {
+    _refShow.current = show;
+    if (show) {
+      scrollAnimate.play();
     }
-
-    const { x, y }: IOffset = refRoot.current!.getBoundingClientRect();
-    refPopup.current!.style.position = 'absolute';
-    refPopup.current!.style.left = x + 'px';
-    refPopup.current!.style.top = y + 'px';
-    refPopup.current!.style.transform = 'translateX(-50%) translateY(-50%)';
+    styleTrigger(Number(show))
+  }, [show]);
+  useLayoutEffect(() => {
+    window.addEventListener('scroll', () => {
+      if (_refShow.current) {
+        scrollAnimate.play()
+      } else {
+        scrollAnimate?.stop();
+      }
+    });
+    return () => window.removeEventListener('scroll', () => {});
   }, []);
-
   return <>
-    {Root()}
-    {ReactDOM.createPortal(
-      Popup(),
-      PopupRoot
-    )}
+    {<TargetDiv ref={_refTargetDiv}/>}
+
+    {ReactDOM.createPortal(<FloatDiv
+      ref={_refFloatDiv}
+      style={({
+        position: 'fixed',
+        ...style
+      })}
+    />, root)}
   </>
 }
