@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import Animate from './../../helpers/requestAnimationFrame';
+import { setLoopRequestAnimationFrame } from '../../helpers/requestAnimationFrame';
 import './style.less';
 
 type IProps = {
@@ -27,15 +27,14 @@ export default function (props: IProps) {
   }
 
   useLayoutEffect(() => {
-    let target: any;
+    let clearFn: Function;
     if (hasLoadEnd) {
-      target = new Animate(() => {
+      clearFn = setLoopRequestAnimationFrame(() => {
         const newFrame = _refFrame.current + 1;
         updateFrame(newFrame > props.frames.length - 1 ? 0 : newFrame)
       }, props.pace || 60);
-      target.playLoop();
     }
-    return () => target?.stop()
+    return () => clearFn && clearFn();
   }, [hasLoadEnd]);
 
   useEffect(() => {

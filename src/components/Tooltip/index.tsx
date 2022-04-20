@@ -1,9 +1,7 @@
 import React, { useEffect, useMemo, useRef } from 'react';
-// import ReactDOM from "react-dom";
-// import Animate from './../../helpers/requestAnimationFrame';
-// import { useTransition } from "./../../hook/index";
 import './style.less';
 import ReactDOM from "react-dom";
+import useTransition from "../../hook/useTransition";
 
 type EPlacement = 'left' | 'top' | 'right' | 'bottom' | 'center';
 type EEventType = 'click' | 'mouse'
@@ -25,11 +23,11 @@ type IProps = {
 }
 
 // 当未配置[placement]时,根据当前屏幕相对位置,进行默认定位
-function autoDirection(targetOffset: IOffset): EPlacement[] {
+function autoDirection(rootOffset: IOffset): EPlacement[] {
   let direction: EPlacement[] = [];
   const origin = {
-    x: targetOffset.left + (targetOffset.width / 2),
-    y: targetOffset.top + (targetOffset.top / 2)
+    x: rootOffset.x + (rootOffset.width / 2),
+    y: rootOffset.y + (rootOffset.height / 2)
   }
   const docOrigin = {
     x: document.body.clientWidth / 2,
@@ -58,12 +56,24 @@ function autoDirection(targetOffset: IOffset): EPlacement[] {
   return direction;
 }
 
-// 根据定位,计算相对偏移量
-function computeOffset(direction: EPlacement[], targetOffset: IOffset, floatOffset: IOffset): IOffset {
-  floatOffset.left = targetOffset.left;
-  floatOffset.top = targetOffset.top;
+const getPlacement = (placement: EPlacement[] | undefined, root: HTMLElement) => {
+  if (typeof placement === 'undefined' || placement.length === 0) {
+    const offset = root.getBoundingClientRect();
+    placement = autoDirection(offset);
+  }
+  return placement;
+};
 
-  if (direction.length !== 0 && direction[0] === direction[1]) {
+// 根据定位,计算相对偏移量
+function computedOffset(placement: EPlacement[] | undefined, root: HTMLElement, popup: HTMLElement): [IOffset, string] {
+  let direction = getPlacement(placement, root);
+  let rootOffset: IOffset = root.getBoundingClientRect();
+  let popupOffset: IOffset = popup.getBoundingClientRect();
+
+  if (direction.length === 0) {
+    direction = autoDirection(rootOffset);
+  }
+  if (direction[0] === direction[1]) {
     throw new Error('nicetoolfn => Tooltip => placement:位置不允许重复')
   }
   if (direction[0] === 'center') {
@@ -72,51 +82,96 @@ function computeOffset(direction: EPlacement[], targetOffset: IOffset, floatOffs
   if (direction[0] !== undefined && [1] === undefined) {
     direction[1] = 'center'
   }
-  if (direction.length === 0) {
-    direction = autoDirection(targetOffset);
-  }
+
+  let origin: string;
+  rootOffset = JSON.parse(JSON.stringify(rootOffset));
+  popupOffset = JSON.parse(JSON.stringify(popupOffset));
+
+  popupOffset.left = rootOffset.left;
+  popupOffset.top = rootOffset.top;
 
   for (let i = 0; i < direction.length; i++) {
     const key = direction[i];
     switch (key) {
       case "left":
-        floatOffset.left = [
-          floatOffset.left - floatOffset.width,
-          floatOffset.left
+        popupOffset.left = [
+          popupOffset.left - popupOffset.width,
+          popupOffset.left
         ][i];
         break;
       case 'right':
-        floatOffset.left = [
-          floatOffset.left + targetOffset.width,
-          floatOffset.left - (floatOffset.width - targetOffset.width)
+        popupOffset.left = [
+          popupOffset.left + rootOffset.width,
+          popupOffset.left - (popupOffset.width - rootOffset.width)
         ][i];
         break
       case 'top':
-        floatOffset.top = [
-          floatOffset.top - floatOffset.height,
-          floatOffset.top
+        popupOffset.top = [
+          popupOffset.top - popupOffset.height,
+          popupOffset.top
         ][i];
         break
       case 'bottom':
-        floatOffset.top = [
-          floatOffset.top + targetOffset.height,
-          floatOffset.top - floatOffset.height + targetOffset.height
+        popupOffset.top = [
+          popupOffset.top + rootOffset.height,
+          popupOffset.top - popupOffset.height + rootOffset.height
         ][i];
         break
       case 'center':
         if (['left', 'right'].includes(direction[0])) {
-          floatOffset.top = floatOffset.top - (floatOffset.height / 2) + (targetOffset.height / 2)
+          popupOffset.top = popupOffset.top - (popupOffset.height / 2) + (rootOffset.height / 2);
         }
         if (["top", "bottom"].includes(direction[0])) {
-          floatOffset.left = floatOffset.left - (floatOffset.width / 2) + (targetOffset.width / 2)
+          popupOffset.left = popupOffset.left - ((popupOffset.width - rootOffset.width) / 2)
         }
         break
     }
   }
-  return floatOffset
+
+  switch (direction[0]) {
+    case 'left':
+      origin = {
+        top: '100% 0',
+        bottom: '100% 100%',
+        center: '100% 50%',
+      }[direction[1] as 'top' | 'bottom' | 'center'];
+      break;
+    case 'right':
+      origin = {
+        top: '0 0',
+        bottom: '0 100%',
+        center: '0 50%',
+      }[direction[1] as 'top' | 'bottom' | 'center'];
+      break;
+    case 'top':
+      origin = {
+        left: '0 100%',
+        right: '100% 100%',
+        center: '50% 100%'
+      }[direction[1] as 'left' | 'right' | 'center'];
+      break;
+    case 'bottom':
+      origin = {
+        left: '0 0',
+        right: '100% 0%',
+        center: '50% 0%'
+      }[direction[1] as 'left' | 'right' | 'center'];
+      break;
+    default:
+      origin = '';
+  }
+
+  return [
+    Object.entries(JSON.parse(JSON.stringify(popupOffset))).reduce<IOffset>((pre, [key, val]) => {
+      // @ts-ignore
+      pre[key] = parseInt(val);
+      return pre
+    }, {} as IOffset),
+    origin
+  ];
 }
 
-console.log(computeOffset);
+let timeout: NodeJS.Timeout;
 
 export default function (props: IProps) {
   const PopupRoot = useMemo(() => {
@@ -134,28 +189,63 @@ export default function (props: IProps) {
   }, []);
   const refRoot = useRef<HTMLElement>();
   const refPopup = useRef<HTMLElement>();
-  const refShow = useRef<Boolean>(false);
-
+  const [style, updateStyle] = useTransition({
+    // display: 'none',
+    opacity: 0.5
+  }, [
+    [1300, {
+      transform: 'scale(1)',
+      backgroundColor: '#0055ff',
+      opacity: 1
+    }]
+  ]);
   const Popup = () => {
     let Component = props.popup;
+    const { trigger } = props;
+    const event = {
+      click: {},
+      mouse: {
+        onMouseOver: () => {
+          timeout && clearTimeout(timeout);
+          updateStyle();
+        },
+        onMouseLeave: () => {
+          timeout && clearTimeout(timeout);
+          timeout = setTimeout(() => {
+            updateStyle(0);
+          }, 1000)
+        }
+      }
+    }[trigger];
     Component = typeof Component === 'function' ? <Component/> : Component;
     Component = React.createElement('div', {
-      ...(Component as React.ReactElement).props,
-      ref: refPopup
+      ref: refPopup,
+      ...event,
+      style
     }, [Component]);
     return Component
   };
+
   const Root = () => {
     let Root = React.Children.only(props.children);
     const { trigger } = props;
     const event = {
       click: {
-        onClick: onClickEvent
+        onClick: () => {
+          props.children.props.onClick();
+          updateStyle();
+        }
       },
       mouse: {
         onMouseOver: () => {
+          timeout && clearTimeout(timeout);
+          updateStyle(1);
         },
         onMouseLeave: () => {
+          timeout && clearTimeout(timeout);
+          timeout = setTimeout(() => {
+            updateStyle(0);
+          }, 1000)
         }
       }
     }[trigger];
@@ -164,32 +254,35 @@ export default function (props: IProps) {
       ...Root.props,
       ...event,
       ref: refRoot
-    })
+    }, [`123123123${Date.now()}`])
 
     return Root;
   }
 
-  const onClickEvent = () => {
-    console.log('refShow', refShow);
-  }
-
   useEffect(() => {
-    if (!refRoot.current || !refPopup.current) {
-      return;
-    }
+    initStyle();
+  }, [JSON.stringify(props.placement)])
 
-    const { x, y }: IOffset = refRoot.current!.getBoundingClientRect();
+  const initStyle = () => {
+    setDefaultPosition();
+
+    const [{ left, top }, origin] = computedOffset(
+      props.placement,
+      refRoot.current as HTMLElement,
+      refPopup!.current as HTMLElement
+    );
+
+    refPopup.current!.style.left = left + 'px';
+    refPopup.current!.style.top = top + 'px';
+    refPopup.current!.style.transformOrigin = origin;
+  };
+  const setDefaultPosition = () => {
     refPopup.current!.style.position = 'absolute';
-    refPopup.current!.style.left = x + 'px';
-    refPopup.current!.style.top = y + 'px';
-    refPopup.current!.style.transform = 'translateX(-50%) translateY(-50%)';
-  }, []);
-
+    refPopup.current!.style.left = refRoot.current!.style.left;
+    refPopup.current!.style.top = refRoot.current!.style.top;
+  }
   return <>
     {Root()}
-    {ReactDOM.createPortal(
-      Popup(),
-      PopupRoot
-    )}
+    {ReactDOM.createPortal(Popup(), PopupRoot)}
   </>
 }
