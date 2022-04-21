@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useRef } from 'react';
-import './style.less';
+import React, { useEffect, useRef } from 'react';
 import ReactDOM from "react-dom";
 import useTransition from "../../hook/useTransition";
+import { setRequestAnimationFrame } from "../../helpers/requestAnimationFrame";
 
 type EPlacement = 'left' | 'top' | 'right' | 'bottom' | 'center';
 type EEventType = 'click' | 'mouse'
@@ -18,6 +18,129 @@ type IProps = {
   gap?: number // 间隔
   [key: string]: any
 }
+
+let timeout: NodeJS.Timeout;
+const Tooltip = function (props: IProps) {
+  const _refTarget = useRef<HTMLElement>();
+  const _refPopup = useRef<HTMLElement>();
+  const [style, triggerStyle] = useTransition({
+    opacity: 0,
+    transform: 'scale(0)'
+  }, [
+    [100, {
+      transform: 'scale(1)',
+      opacity: 1
+    }],
+    [100, {
+      transform: 'scale(0.8)',
+      opacity: 0
+    }]
+  ], (step: number) => {
+    step === 1 && (_refPopup.current!.style.transform = 'scale(0)')
+  });
+
+  useEffect(() => {
+    initStyle();
+
+    window.addEventListener('scroll', () => {
+      setRequestAnimationFrame(initStyle, 300);
+    })
+    return window.removeEventListener('scroll', () => {});
+  }, [JSON.stringify(style)]);
+
+  const initStyle = () => {
+    const { gap } = props;
+    const [{ left, top }, origin] = computedOffset(
+      props.placement,
+      _refTarget!.current as HTMLElement,
+      _refPopup!.current as HTMLElement,
+      gap
+    );
+
+    _refPopup.current!.style.position = 'absolute';
+    _refPopup.current!.style.left = left + 'px';
+    _refPopup.current!.style.top = top + 'px';
+    _refPopup.current!.style.transformOrigin = origin;
+  };
+
+  const { children, popup, trigger } = props;
+
+  const popupEvent = {
+    click: {},
+    mouse: {
+      onMouseOver: () => {
+        timeout && clearTimeout(timeout);
+        triggerStyle(0);
+      },
+      onMouseLeave: () => {
+        timeout && clearTimeout(timeout);
+        timeout = setTimeout(() => {
+          triggerStyle(1);
+        }, 1000)
+      }
+    }
+  }[trigger];
+  const targetEvent = {
+    click: {
+      onClick: () => {
+        const { onClick } = props.children.props;
+        onClick && onClick();
+        triggerStyle();
+      }
+    },
+    mouse: {
+      onMouseOver: () => {
+        timeout && clearTimeout(timeout);
+        triggerStyle(0);
+      },
+      onMouseLeave: () => {
+        timeout && clearTimeout(timeout);
+        timeout = setTimeout(() => {
+          triggerStyle(1);
+        }, 1000)
+      }
+    }
+  }[trigger];
+
+  return <>
+    <Root ref={_refTarget} component={children}
+          event={targetEvent}
+    />
+    <Popup ref={_refPopup} component={popup}
+           event={popupEvent}
+           style={style}
+    />
+  </>
+}
+
+const Root = React.forwardRef((props: any, ref: any) => {
+  const { component, event } = props;
+  const ele = React.Children.only(component);
+
+  return React.cloneElement(ele, {
+    ...ele.props,
+    ...event,
+    ref
+  })
+})
+const Popup = React.forwardRef((props: any, ref: any) => {
+  let { component: Component, style, event } = props;
+  const _Component = () => {
+    return typeof Component === 'function' ? <Component key={performance.now()}/>
+      : React.cloneElement(Component, { key: performance.now() });
+  }
+
+  return <>{
+    ReactDOM.createPortal(
+      React.createElement('div', {
+        ref,
+        style,
+        ...event
+      }, [_Component()]),
+      rootEle()
+    )
+  }</>
+})
 
 // 当未配置[placement]时,根据当前屏幕相对位置,进行默认定位
 function autoDirection(rootOffset: IOffset): EPlacement[] {
@@ -53,13 +176,13 @@ function autoDirection(rootOffset: IOffset): EPlacement[] {
   return direction;
 }
 
-const getPlacement = (placement: EPlacement[] | undefined, root: HTMLElement) => {
+function getPlacement(placement: EPlacement[] | undefined, root: HTMLElement) {
   if (typeof placement === 'undefined' || placement.length === 0) {
     const offset = root.getBoundingClientRect();
     placement = autoDirection(offset);
   }
   return placement;
-};
+}
 
 // 根据定位,计算相对偏移量
 function computedOffset(placement: EPlacement[] | undefined, root: HTMLElement, popup: HTMLElement, gap: number = 10): [IOffset, string] {
@@ -176,125 +299,18 @@ function computedOffset(placement: EPlacement[] | undefined, root: HTMLElement, 
   ];
 }
 
-let timeout: NodeJS.Timeout;
-
-export default function (props: IProps) {
-  const refRoot = useRef<HTMLElement>();
-  const refPopup = useRef<HTMLElement>();
-  const [style, updateStyle] = useTransition({
-    opacity: 0,
-    transform: 'scale(0)'
-  }, [
-    [100, {
-      transform: 'scale(1)',
-      opacity: 1
-    }],
-    [100, {
-      transform: 'scale(0.8)',
-      color: 'yellow',
-      opacity: 0
-    }]
-  ]);
-  const PopupRoot = useMemo(() => {
-    return document.getElementById('nicetoolfn-tooltip') || (() => {
-      const div = document.createElement('div')
-      div.setAttribute('id', 'nicetoolfn-tooltip');
-      div.style.position = 'absolute';
-      div.style.left = '0';
-      div.style.top = '0';
-      div.style.width = '0';
-      div.style.height = '0';
-      document.body.appendChild(div);
-      return div
-    })();
-  }, []);
-
-  const Popup = () => {
-    let Component = props.popup;
-    const { trigger } = props;
-    const event = {
-      click: {},
-      mouse: {
-        onMouseOver: () => {
-          timeout && clearTimeout(timeout);
-          updateStyle(0);
-        },
-        onMouseLeave: () => {
-          timeout && clearTimeout(timeout);
-          timeout = setTimeout(() => {
-            updateStyle(1);
-          }, 1000)
-        }
-      }
-    }[trigger];
-
-    Component = typeof Component === 'function' ? <Component/> : Component;
-    Component = React.createElement('div', {
-      ref: refPopup,
-      ...event,
-      style
-    }, [Component]);
-    return Component
-  };
-
-  const Root = () => {
-    let Root = React.Children.only(props.children);
-    const { trigger } = props;
-    const event = {
-      click: {
-        onClick: () => {
-          props.children.props.onClick();
-          updateStyle();
-        }
-      },
-      mouse: {
-        onMouseOver: () => {
-          timeout && clearTimeout(timeout);
-          updateStyle(0);
-        },
-        onMouseLeave: () => {
-          timeout && clearTimeout(timeout);
-          timeout = setTimeout(() => {
-            updateStyle(1);
-          }, 1000)
-        }
-      }
-    }[trigger];
-
-    Root = React.cloneElement(Root, {
-      ...Root.props,
-      ...event,
-      ref: refRoot
-    })
-
-    return Root;
-  }
-
-  useEffect(() => {
-    initStyle();
-  }, [
-    JSON.stringify(style),
-    refRoot.current?.offsetLeft,
-    refRoot.current?.offsetTop
-  ])
-
-  const initStyle = () => {
-    const { gap } = props;
-    const [{ left, top }, origin] = computedOffset(
-      props.placement,
-      refRoot.current as HTMLElement,
-      refPopup!.current as HTMLElement,
-      gap
-    );
-
-    refPopup.current!.style.position = 'absolute';
-    refPopup.current!.style.left = left + 'px';
-    refPopup.current!.style.top = top + 'px';
-    refPopup.current!.style.transformOrigin = origin;
-  };
-
-  return <>
-    {Root()}
-    {ReactDOM.createPortal(Popup(), PopupRoot)}
-  </>
+function rootEle() {
+  return document.getElementById('nicetoolfn-tooltip') || (() => {
+    const div = document.createElement('div')
+    div.setAttribute('id', 'nicetoolfn-tooltip');
+    div.style.position = 'absolute';
+    div.style.left = '0';
+    div.style.top = '0';
+    div.style.width = '0';
+    div.style.height = '0';
+    document.body.appendChild(div);
+    return div
+  })();
 }
+
+export default Tooltip;

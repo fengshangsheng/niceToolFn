@@ -1,5 +1,4 @@
 import React, { useImperativeHandle, useMemo, useRef, useState, useContext, useEffect, useLayoutEffect } from 'react';
-import './style.less';
 import ReactDOM from "react-dom";
 import useTransition, { TKeyVal, TList } from "../../hook/useTransition";
 import { setRequestAnimationFrame } from "../../helpers/requestAnimationFrame";
@@ -29,6 +28,21 @@ const _defaultStyle: TDefaultStyle = [{
     transform: 'translateX(-50%) translateY(-50%) scale(1.185)'
   }]
 ]]
+const _popupMaskStyle: TKeyVal = {
+  position: 'fixed',
+  left: '50%',
+  top: '0',
+  right: '0',
+  bottom: '0',
+  backgroundColor: 'rgba(0, 0, 0, 0.3)'
+}
+const _popupItemStyle: TKeyVal = {
+  position: 'fixed',
+  left: '50%',
+  top: '50%',
+  backgroundColor: 'red',
+  zIndex: '10'
+}
 
 const Popup = React.forwardRef((props: any, ref) => {
   const _refDefaultStyle = useRef<TDefaultStyle>(false);
@@ -88,7 +102,7 @@ const Popup = React.forwardRef((props: any, ref) => {
 const PopupList = (props: any) => {
   const { popupList, pointer } = props;
   const [style, triggerStyle] = useTransition(
-    {},
+    { opacity: 0, zIndex: -9 },
     [
       [300, { opacity: 1, zIndex: 9 }],
       [300, { opacity: 0, zIndex: -9 }]
@@ -100,7 +114,7 @@ const PopupList = (props: any) => {
   }, [pointer]);
 
   return <>
-    <div className="nicetoolfn-popup-mask" style={style}/>
+    <div className="nicetoolfn-popup-mask" style={({ ..._popupMaskStyle, ...style })}/>
     {popupList.map((item: TComponent, index: number) => {
       return <PopupItem key={index} funComponent={item} pointer={pointer} index={index}/>
     })}
@@ -129,7 +143,7 @@ const PopupItem = (props: any) => {
   return <>
     {React.createElement('div', {
       className: 'nicetoolfn-popup-item',
-      style
+      style: { ..._popupItemStyle, ...style }
     }, [FunComponent ? <FunComponent {...deps} key={index}/> : ''])}
   </>;
 }

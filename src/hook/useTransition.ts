@@ -31,7 +31,7 @@ const useTransition = function (_default: TKeyVal, list: TList[], animateEnd?: F
       }
       newStep = pointer;
     }
-    console.log('newStep', newStep);
+
     updateStep(newStep);
   }
   useLayoutEffect(() => {
@@ -55,7 +55,7 @@ const useTransition = function (_default: TKeyVal, list: TList[], animateEnd?: F
 
       return `${item} ${time}ms`
     }).join(',');
-    console.log('style', _step, style);
+
     updateItem({ transition, ...style });
 
     initCallback(_step);

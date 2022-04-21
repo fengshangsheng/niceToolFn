@@ -1,14 +1,15 @@
+let canceller: number = 0;
+
+const clearAnimationFrame = () => {
+  canceller && cancelAnimationFrame(canceller);
+}
 export function setRequestAnimationFrame(
   fn: Function,
   pace: number = 0,
   startMs = performance.now()
 ): Function {
-  let canceller: number = 0;
-  const clear = () => {
-    canceller && cancelAnimationFrame(canceller);
-  }
   const init = () => {
-    clear();
+    clearAnimationFrame();
     canceller = requestAnimationFrame(() => {
       const curMs = performance.now();
       const diff = curMs - startMs;
@@ -20,12 +21,13 @@ export function setRequestAnimationFrame(
     });
   }
   init();
-  return () => clear();
+  return () => clearAnimationFrame();
 }
 
 export function setLoopRequestAnimationFrame(fn: Function, pace: number = 0): Function {
   let isStop = false;
   const clear = () => {
+    clearAnimationFrame();
     isStop = true;
   }
   const init = () => {

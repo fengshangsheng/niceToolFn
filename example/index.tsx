@@ -2,15 +2,15 @@ import 'react-app-polyfill/ie9';
 import React, { useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { Popup, Popup2, Tooltip } from '../dist'; // 此处存在parcel alias 见下文
-import '../dist/nicetoolfn.css';
+// import '../dist/nicetoolfn.css';
 import './index.less';
 
 const TipBox = (props: any) => {
-  return <div>
+  return <div style={({ backgroundColor: 'red' })}>
     <p>~~~~{props.count}~~~</p>
     <p>{Date.now()}</p>
     <p>{props.count % 2}</p>
-    <button onClick={()=>props.handleAdd()}>add</button>
+    <button onClick={() => props.handleAdd()}>add</button>
   </div>
 }
 
@@ -78,8 +78,19 @@ const App = () => {
              popup={() => <TipBox count={count} handleAdd={handleAdd}/>} // 选填:弹出组件
              gap={10}// 选填: 弹出组件与目标元素之间的间隔大小
     >
-      <button style={({ background: 'red', left: '50%', top: '50%', position: 'absolute' })} onClick={() => handleAdd()}>component</button>
+      <button style={({ background: 'red', left: '50%', top: '50%', position: 'absolute' })} onClick={() => handleAdd()}>
+        component{count}
+      </button>
     </Tooltip>
+    <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+    <Tooltip trigger={'mouse'} // 必填:事件类型: click, mouse
+             // placement={['bottom', 'left']} // 必填:弹出位置: left,right,top,bottom
+             popup={<TipBox count={count } handleAdd={handleAdd}/>} // 选填:弹出组件
+             gap={10}// 选填: 弹出组件与目标元素之间的间隔大小
+    >
+      <button style={({ background: 'red', left: '50%', top: 'auto', position: 'absolute' })} onClick={() => handleAdd()}>component</button>
+    </Tooltip>
+    <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
     {/*<Tooltip trigger={'mouse'} // 必填:事件类型: click, mouse*/}
     {/*         placement={['left', 'top']} // 必填:弹出位置: left,right,top,bottom*/}
     {/*         popup={() => <TipBox count={count}/>} // 选填:弹出组件*/}

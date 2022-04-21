@@ -8,44 +8,52 @@
 
 ```javascript
 import { Popup } from 'nicetoolfn';
-import 'nicetoolfn/dist/nicetoolfn.css'
 
-/**
- * @param props {
- *    closePopup: Function  关闭当前弹窗
- *    closeAllPopup: Function   关闭全部弹窗
- *    emit: (data: {[key:string]:any}) => void   向父弹窗传递数据
- *    childData: {[key:string]:any}   接受子弹窗数据
- * }
- *
- * ext: 传入function组件为展示弹窗内容,可通过props对象接受一系列事件方法
- * */
-new Popup((props) => {
-  const [count, updateCount] = useState(0);
-  const [data] = useState(Date.now());
+const App = () => {
+  const [count, updateShow] = useState(0);
+  const _ref = useRef();
 
-  useEffect(() => {
-    const {childCount = 0} = props.childData;
-    updateCount(childCount + count);
-  }, [props.childData]);
-  return (
-    <div className='modal'>
-      <h1>{data}</h1>
+  const handleEvNew = () => {
+    /** _ref.current绑定组件实例，抛出两个事件
+     * _ref.current.open()  
+     * @param { Element | (props)=>Element } 弹窗组件
+     * @param { Array<{ [key]:value },Array<Array<[ string, {[key]:value} ]>>> } 弹出动画 
+     * _ref.current.clear()  关闭弹窗
+     * */
+    _ref.current.open(
+      (props: any) => (<div>
+        <h1>fengfengss{props.count}</h1>
+        <button onClick={() => _ref.current.clear()}>clear</button>
+        <button onClick={() => props.handleAdd()}>add</button>
+      </div>),
+      [{
+        opacity: 0,
+        transform: 'translateX(-50%) translateY(-50%) scale(1.185)'
+      }, [
+        [300, {
+          transform: 'translateX(-50%) translateY(-50%) scale(1)',
+          opacity: 1,
+          backgroundColor: 'red'
+        }],
+        [300, {
+          opacity: 0,
+          transform: 'translateX(-50%) translateY(-50%) scale(1.185)',
+          backgroundColor: 'blue'
+        }]
+      ]]
+    )
+  }
 
-      count:{count}
-
-      <button onClick={() => updateCount(count + 1)}>click</button>
-      <button onClick={() => handlePopup()}>open</button>
-      <button onClick={() => props.closePopup()}>close</button>
-      <button onClick={() => props.closeAllPopup()}>closeAll</button>
-      <button onClick={() => {
-        props.closePopup()
-        props.emit({childCount: count})
-      }}>emit
-      </button>
-    </div>
-  )
-});
+  return <>
+    <button onClick={() => handleOpen()}>open</button>
+    {/* 
+      将数据传递至<Popup/>,
+      可在 _ref.current.open((props)=><></>) 中获取即时最新的数据 
+    */}
+    <Popup ref={_ref} count={count} handleAdd={handleAdd}/>
+  </>
+}
+ReactDOM.render(<App/>, document.getElementById('root'));
 ```
 
 </pre>
@@ -122,7 +130,7 @@ const [
       opacity: 0
     }]
   ],
-  (step:number)=>{
+  (step: number) => {
     // step 标识当前激活样式list的索引
     // 当css样式切换成功, 会执行当前回调函数
     // 初始化时, 当前函数不执行
@@ -177,11 +185,11 @@ const TipBox = (props: any) => {
 function App() {
   return (
     <Tooltip trigger={'click'} // 必填:事件类型: click, mouse
-             placement={['top', 'right']} // 必填:弹出位置: left,right,top,bottom 
-             popup={() => <TipBox count={count}/>} // 选填:弹出组件
+             popup={() => <TipBox count={count}/>} // 必填:弹出组件，可填入函数或<标签/>
+             placement={['top', 'right']} // 选填:弹出位置: left,right,top,bottom 
              gap={10}// 选填: 弹出组件与目标元素之间的间隔大小
     >
-      <button style={({ background: 'red'})} onClick={() => handleEv()}>component</button>
+      <button style={({background: 'red'})} onClick={() => handleEv()}>component</button>
     </Tooltip>
   )
 }

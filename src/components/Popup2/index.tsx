@@ -38,7 +38,6 @@ function PopupGroup() {
     <TransitionGroup>
       {popupList.map((item, index) => {
         const Component = item.component;
-        console.log('Component', Component);
         const props: IComponentProps = {
           childData: popupList[index].childData,
           closePopup: () => closePopup(index, 1),
@@ -46,6 +45,7 @@ function PopupGroup() {
           forcedRefresh: () => forcedRefresh(),
           emit: (data: IKeyVal) => index !== 0 && emit(data, index - 1)
         };
+
         return (
           <CSSTransition key={index} timeout={300} classNames="nicetoolfnPopupItem">
             <Component {...props}/>
