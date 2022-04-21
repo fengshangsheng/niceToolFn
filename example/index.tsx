@@ -17,7 +17,7 @@ const TipBox = (props: any) => {
 
 const App = () => {
   const [count, updateShow] = useState(0);
-  const [aaa, updateAAA] = useState<'left' | 'top' | 'right' | 'bottom' | 'center'>('right');
+  const [aaa, updateAAA] = useState<'left' | 'top' | 'right' | 'bottom' | 'center'>('top');
   const handleEv = () => {
     updateShow(count + 1);
   }
@@ -40,18 +40,18 @@ const App = () => {
     <h1>{count}~~~{count % 2 ? '1111111111111' : '222222222222222'}</h1>
     <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
     <Tooltip trigger={'click'}
-             placement={[aaa, 'top']}
+             placement={[aaa, 'right']}
              popup={() => <TipBox count={count}/>}
     >
-      <button style={({ background: 'red', position: 'absolute', left: '200px', top: '100px' })} onClick={() => handleEv()}>component</button>
+      <button style={({ background: 'red'})} onClick={() => handleEv()}>component</button>
     </Tooltip>
     <Tooltip trigger={'click'}
-             placement={[aaa, 'bottom']}
+             placement={[aaa, 'left']}
              popup={() => <TipBox count={count}/>}
     >
       <button style={({ background: 'red', position: 'absolute', left: '200px', top: '200px' })} onClick={() => handleEv()}>component</button>
     </Tooltip>
-    <Tooltip trigger={'click'}
+    <Tooltip trigger={'mouse'}
              placement={[aaa, 'center']}
              popup={() => <TipBox count={count}/>}
     >

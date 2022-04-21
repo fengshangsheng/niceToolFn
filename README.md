@@ -1,6 +1,7 @@
 `npm install --save nicetoolfn`
 
 ### 方法
+
 <details>
 <summary style="font-size: 18px; font-weight: bold">🔥 Popup---弹窗</summary>
 <pre style="padding: 0;font-size: 14px;background-color: transparent;">
@@ -75,7 +76,8 @@ target.stopCountDown(); // 拿到实例后，停止倒计时
 </pre>
 </details>
 
-### hooks
+### Hooks
+
 <details>
 <summary style="font-size: 18px; font-weight: bold">🔥 usePages---分页</summary>
 <pre style="padding: 0;font-size: 14px;background-color: transparent;">
@@ -95,9 +97,44 @@ const [
 ```
 
 </pre>
+</details>  <details>
+<summary style="font-size: 18px; font-weight: bold">🔥 useTransition---css动画</summary>
+<pre style="padding: 0;font-size: 14px;background-color: transparent;">
+
+```javascript
+import { usePages } from 'nicetoolfn'
+
+const [
+  style, // 当前激活的css样式对象
+  updateStyle // 更新激活的css对象
+] = useTransition(
+  // 初始化默认样式
+  {opacity: 0, transform: 'scale(0)'},
+  // 切换的样式列表
+  [
+    [100, {
+      transform: 'scale(1)',
+      opacity: 1
+    }],
+    [100, {
+      transform: 'scale(0.8)',
+      color: 'yellow',
+      opacity: 0
+    }]
+  ],
+  (step:number)=>{
+    // step 标识当前激活样式list的索引
+    // 当css样式切换成功, 会执行当前回调函数
+    // 初始化时, 当前函数不执行
+  }
+);
+```
+
+</pre>
 </details>  
 
 ### 组件
+
 <details>
 <summary style="font-size: 18px; font-weight: bold">🔥 LoopFrames---帧动画</summary>
 <pre style="padding: 0;font-size: 14px;background-color: transparent;">
@@ -105,7 +142,7 @@ const [
 ```javascript
 import { LoopFrames } from 'nicetoolfn'
 
-function App(){
+function App() {
   return (
     <LoopFrames
       frames={[
@@ -115,7 +152,29 @@ function App(){
       ]}
       pace={120} // 帧切换速率
       className={'myclass'}
-    />    
+    />
+  )
+}
+```
+
+</pre>
+</details>
+<details>
+<summary style="font-size: 18px; font-weight: bold">🔥 Tooltip---工具提示</summary>
+<pre style="padding: 0;font-size: 14px;background-color: transparent;">
+
+```javascript
+import { Tooltip } from 'nicetoolfn'
+ 
+function App() {
+  return (
+    <Tooltip trigger={'click'} // 必填:事件类型: click, mouse
+             placement={['top', 'right']} // 必填:弹出位置: left,right,top,bottom 
+             popup={() => <TipBox count={count}/>} // 选填:弹出组件
+             gap={10}// 选填: 弹出组件与目标元素之间的间隔大小
+    >
+      <button style={({ background: 'red'})} onClick={() => handleEv()}>component</button>
+    </Tooltip>
   )
 }
 ```

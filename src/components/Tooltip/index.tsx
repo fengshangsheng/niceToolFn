@@ -6,12 +6,8 @@ import useTransition from "../../hook/useTransition";
 type EPlacement = 'left' | 'top' | 'right' | 'bottom' | 'center';
 type EEventType = 'click' | 'mouse'
 type IOffset = {
-  x: number
-  y: number
   left: number
   top: number
-  right: number
-  bottom: number
   width: number
   height: number
 }
@@ -19,6 +15,7 @@ type IProps = {
   trigger: EEventType // 事件触发类型
   popup: React.ReactNode // 提示组件
   placement?: EPlacement[] // 提示方位
+  gap?: number // 间隔
   [key: string]: any
 }
 
@@ -26,31 +23,31 @@ type IProps = {
 function autoDirection(rootOffset: IOffset): EPlacement[] {
   let direction: EPlacement[] = [];
   const origin = {
-    x: rootOffset.x + (rootOffset.width / 2),
-    y: rootOffset.y + (rootOffset.height / 2)
+    left: rootOffset.left + (rootOffset.width / 2),
+    top: rootOffset.top + (rootOffset.height / 2)
   }
   const docOrigin = {
-    x: document.body.clientWidth / 2,
-    y: document.body.clientHeight / 2,
+    left: document.body.clientWidth / 2,
+    top: document.body.clientHeight / 2,
   }
   // 1向限
-  if (origin.x < docOrigin.x && origin.y < docOrigin.y) {
+  if (origin.left < docOrigin.left && origin.top < docOrigin.top) {
     direction = ['right', 'top'];
   }
   // 2向限
-  if (origin.x > docOrigin.x && origin.y < docOrigin.y) {
+  if (origin.left > docOrigin.left && origin.top < docOrigin.top) {
     direction = ['left', 'top'];
   }
   // 3向限
-  if (origin.x > docOrigin.x && origin.y > docOrigin.y) {
+  if (origin.left > docOrigin.left && origin.top > docOrigin.top) {
     direction = ['left', 'bottom'];
   }
   // 4向限
-  if (origin.x < docOrigin.x && origin.y > docOrigin.y) {
+  if (origin.left < docOrigin.left && origin.top > docOrigin.top) {
     direction = ['right', 'bottom'];
   }
   // 中心点
-  if (origin.x === docOrigin.x && origin.y === docOrigin.y) {
+  if (origin.left === docOrigin.left && origin.top === docOrigin.top) {
     direction = ['bottom'];
   }
   return direction;
@@ -65,10 +62,20 @@ const getPlacement = (placement: EPlacement[] | undefined, root: HTMLElement) =>
 };
 
 // 根据定位,计算相对偏移量
-function computedOffset(placement: EPlacement[] | undefined, root: HTMLElement, popup: HTMLElement): [IOffset, string] {
+function computedOffset(placement: EPlacement[] | undefined, root: HTMLElement, popup: HTMLElement, gap: number = 10): [IOffset, string] {
   let direction = getPlacement(placement, root);
-  let rootOffset: IOffset = root.getBoundingClientRect();
-  let popupOffset: IOffset = popup.getBoundingClientRect();
+  const rootOffset: IOffset = {
+    left: root.offsetLeft,
+    top: root.offsetTop,
+    width: root.offsetWidth,
+    height: root.offsetHeight
+  };
+  const popupOffset: IOffset = {
+    left: popup.offsetLeft,
+    top: popup.offsetTop,
+    width: popup.offsetWidth,
+    height: popup.offsetHeight
+  };
 
   if (direction.length === 0) {
     direction = autoDirection(rootOffset);
@@ -84,8 +91,6 @@ function computedOffset(placement: EPlacement[] | undefined, root: HTMLElement, 
   }
 
   let origin: string;
-  rootOffset = JSON.parse(JSON.stringify(rootOffset));
-  popupOffset = JSON.parse(JSON.stringify(popupOffset));
 
   popupOffset.left = rootOffset.left;
   popupOffset.top = rootOffset.top;
@@ -95,25 +100,25 @@ function computedOffset(placement: EPlacement[] | undefined, root: HTMLElement, 
     switch (key) {
       case "left":
         popupOffset.left = [
-          popupOffset.left - popupOffset.width,
+          popupOffset.left - popupOffset.width - gap,
           popupOffset.left
         ][i];
         break;
       case 'right':
         popupOffset.left = [
-          popupOffset.left + rootOffset.width,
+          popupOffset.left + rootOffset.width + gap,
           popupOffset.left - (popupOffset.width - rootOffset.width)
         ][i];
         break
       case 'top':
         popupOffset.top = [
-          popupOffset.top - popupOffset.height,
+          popupOffset.top - popupOffset.height - gap,
           popupOffset.top
         ][i];
         break
       case 'bottom':
         popupOffset.top = [
-          popupOffset.top + rootOffset.height,
+          popupOffset.top + rootOffset.height + gap,
           popupOffset.top - popupOffset.height + rootOffset.height
         ][i];
         break
@@ -190,13 +195,17 @@ export default function (props: IProps) {
   const refRoot = useRef<HTMLElement>();
   const refPopup = useRef<HTMLElement>();
   const [style, updateStyle] = useTransition({
-    // display: 'none',
-    opacity: 0.5
+    opacity: 0,
+    transform: 'scale(0)'
   }, [
-    [1300, {
+    [100, {
       transform: 'scale(1)',
-      backgroundColor: '#0055ff',
       opacity: 1
+    }],
+    [100, {
+      transform: 'scale(0.8)',
+      color: 'yellow',
+      opacity: 0
     }]
   ]);
   const Popup = () => {
@@ -207,12 +216,12 @@ export default function (props: IProps) {
       mouse: {
         onMouseOver: () => {
           timeout && clearTimeout(timeout);
-          updateStyle();
+          updateStyle(0);
         },
         onMouseLeave: () => {
           timeout && clearTimeout(timeout);
           timeout = setTimeout(() => {
-            updateStyle(0);
+            updateStyle(1);
           }, 1000)
         }
       }
@@ -239,12 +248,12 @@ export default function (props: IProps) {
       mouse: {
         onMouseOver: () => {
           timeout && clearTimeout(timeout);
-          updateStyle(1);
+          updateStyle(0);
         },
         onMouseLeave: () => {
           timeout && clearTimeout(timeout);
           timeout = setTimeout(() => {
-            updateStyle(0);
+            updateStyle(1);
           }, 1000)
         }
       }
@@ -261,26 +270,26 @@ export default function (props: IProps) {
 
   useEffect(() => {
     initStyle();
-  }, [JSON.stringify(props.placement)])
+  }, [
+    JSON.stringify(style),
+    refRoot.current?.offsetLeft,
+    refRoot.current?.offsetTop
+  ])
 
   const initStyle = () => {
-    setDefaultPosition();
-
+    const { gap } = props;
     const [{ left, top }, origin] = computedOffset(
       props.placement,
       refRoot.current as HTMLElement,
-      refPopup!.current as HTMLElement
+      refPopup!.current as HTMLElement,
+      gap
     );
 
+    refPopup.current!.style.position = 'absolute';
     refPopup.current!.style.left = left + 'px';
     refPopup.current!.style.top = top + 'px';
     refPopup.current!.style.transformOrigin = origin;
   };
-  const setDefaultPosition = () => {
-    refPopup.current!.style.position = 'absolute';
-    refPopup.current!.style.left = refRoot.current!.style.left;
-    refPopup.current!.style.top = refRoot.current!.style.top;
-  }
   return <>
     {Root()}
     {ReactDOM.createPortal(Popup(), PopupRoot)}
