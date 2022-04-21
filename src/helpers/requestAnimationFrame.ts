@@ -8,7 +8,6 @@ export function setRequestAnimationFrame(
     canceller && cancelAnimationFrame(canceller);
   }
   const init = () => {
-
     clear();
     canceller = requestAnimationFrame(() => {
       const curMs = performance.now();

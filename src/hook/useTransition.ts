@@ -1,9 +1,9 @@
 import { useLayoutEffect, useState } from "react";
 import { setRequestAnimationFrame } from './../helpers/requestAnimationFrame';
 
-type TKeyVal = { [key: string]: any }
-type TReturn = [TKeyVal, Function, number];
-type TList = [number, TKeyVal]
+export type TKeyVal = { [key: string]: any }
+export type TReturn = [TKeyVal, Function, number];
+export type TList = [number, TKeyVal];
 
 let canceller: Function;
 const useTransition = function (_default: TKeyVal, list: TList[], animateEnd?: Function): TReturn {
@@ -19,17 +19,19 @@ const useTransition = function (_default: TKeyVal, list: TList[], animateEnd?: F
   const trigger = (pointer?: number) => {
     let newStep: number;
 
-    if (_step === -1) {
-      newStep = 0;
-    } else if (typeof pointer === 'undefined') {
-      newStep = _step === list.length - 1 ? 0 : _step + 1;
+    if (typeof pointer === 'undefined') {
+      if (_step === -1) {
+        newStep = 0
+      } else {
+        newStep = _step === list.length - 1 ? 0 : _step + 1;
+      }
     } else {
       if (pointer > list.length || pointer < 0) {
         throw new Error('nicetoolfn => Tooltip => pointer:阙值错误,pointer不可超过数组length');
       }
       newStep = pointer;
     }
-
+    console.log('newStep', newStep);
     updateStep(newStep);
   }
   useLayoutEffect(() => {
@@ -39,8 +41,12 @@ const useTransition = function (_default: TKeyVal, list: TList[], animateEnd?: F
 
     const [time, style] = list[_step];
     const [, preStyle] = list[_step - 1] ? list[_step - 1] : list[list.length - 1]
+    const newStyle = {
+      ...preStyle,
+      ...style
+    }
 
-    const transition = Object.keys({ ...style, ...preStyle }).map((item) => {
+    const transition = Object.keys(newStyle).map((item) => {
       if (item == 'transition') {
         throw new Error('nicetoolfn => useTransitions => 不可输入:transition');
       }
@@ -49,7 +55,7 @@ const useTransition = function (_default: TKeyVal, list: TList[], animateEnd?: F
 
       return `${item} ${time}ms`
     }).join(',');
-
+    console.log('style', _step, style);
     updateItem({ transition, ...style });
 
     initCallback(_step);

@@ -1,74 +1,92 @@
 import 'react-app-polyfill/ie9';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { Tooltip, LoopFrames } from '../dist'; // 此处存在parcel alias 见下文
+import { Popup, Popup2, Tooltip } from '../dist'; // 此处存在parcel alias 见下文
 import '../dist/nicetoolfn.css';
 import './index.less';
 
 const TipBox = (props: any) => {
-  return <div datatype={'1111111111111'}
-              // style={({ background: 'yellow' })}
-  >
+  return <div>
     <p>~~~~{props.count}~~~</p>
     <p>{Date.now()}</p>
-    <p>{props.count % 2 ? '1111111111111' : '1111111111112'}</p>
+    <p>{props.count % 2}</p>
+    <button onClick={()=>props.handleAdd()}>add</button>
   </div>
 }
 
 const App = () => {
   const [count, updateShow] = useState(0);
-  const [aaa, updateAAA] = useState<'left' | 'top' | 'right' | 'bottom' | 'center'>('top');
-  const handleEv = () => {
+  const _ref = useRef();
+  const handleAdd = () => {
     updateShow(count + 1);
   }
 
+  const handleEvNew = () => {
+    const aaa = () => [(props: any) => {
+      return <div>
+        <h1>fengfengss{props.count}</h1>
+        <button onClick={() => (_ref.current as any).open(...aaa())}>open</button>
+        <button onClick={() => (_ref.current as any).clear()}>clear</button>
+        <button onClick={() => props.handleAdd()}>add</button>
+      </div>
+    }, [{
+      opacity: 0,
+      transform: 'translateX(-50%) translateY(-50%) scale(1.185)'
+    }, [
+      [300, {
+        transform: 'translateX(-50%) translateY(-50%) scale(1)',
+        opacity: 1,
+        backgroundColor: 'red'
+      }],
+      [300, {
+        opacity: 0,
+        transform: 'translateX(-50%) translateY(-50%) scale(1.185)',
+        backgroundColor: 'blue'
+      }]
+    ]]]
+    // @ts-ignore
+    _ref.current.open(...aaa())
+  }
+  const handleEv = () => {
+    new Popup2((props) => {
+      return (
+        <div className='modal'>
+          count:{count}
+          <button onClick={() => {
+            props.closePopup()
+            props.emit({ childCount: count })
+          }}>emit
+          </button>
+        </div>
+      )
+    });
+  }
   return <div>
-    <button onClick={()=>updateAAA('left')}>placement</button>
-    <LoopFrames frames={[
-      'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00000.png',
-      'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00001.png',
-      'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00002.png',
-      'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00003.png',
-      'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00004.png',
-      'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00005.png',
-      'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00006.png',
-      'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00007.png',
-      'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00008.png',
-      'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00009.png',
-      'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00010.png',
-    ]} pace={60}/>
-    <h1>{count}~~~{count % 2 ? '1111111111111' : '222222222222222'}</h1>
-    <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
-    <Tooltip trigger={'click'}
-             placement={[aaa, 'right']}
-             popup={() => <TipBox count={count}/>}
+    <p>{count}</p>
+    <p>
+      <button onClick={() => handleAdd()}>add</button>
+    </p>
+    <p>
+      <button onClick={() => handleEv()}>open old</button>
+    </p>
+    <p>
+      <button onClick={() => handleEvNew()}>open new</button>
+    </p>
+    <Popup ref={_ref} count={count} handleAdd={handleAdd}/>
+    <Tooltip trigger={'click'} // 必填:事件类型: click, mouse
+             placement={['top', 'right']} // 必填:弹出位置: left,right,top,bottom
+             popup={() => <TipBox count={count} handleAdd={handleAdd}/>} // 选填:弹出组件
+             gap={10}// 选填: 弹出组件与目标元素之间的间隔大小
     >
-      <button style={({ background: 'red'})} onClick={() => handleEv()}>component</button>
+      <button style={({ background: 'red', left: '50%', top: '50%', position: 'absolute' })} onClick={() => handleAdd()}>component</button>
     </Tooltip>
-    <Tooltip trigger={'click'}
-             placement={[aaa, 'left']}
-             popup={() => <TipBox count={count}/>}
-    >
-      <button style={({ background: 'red', position: 'absolute', left: '200px', top: '200px' })} onClick={() => handleEv()}>component</button>
-    </Tooltip>
-    <Tooltip trigger={'mouse'}
-             placement={[aaa, 'center']}
-             popup={() => <TipBox count={count}/>}
-    >
-      <button style={({ background: 'red', position: 'absolute', left: '200px', top: '300px' })} onClick={() => handleEv()}>component</button>
-    </Tooltip>
-    <div></div>
-    {/*<Tooltip trigger={'click'}*/}
-    {/*         placement={['right', 'center']}*/}
-    {/*         popup={<TipBox count={count}/> }*/}
+    {/*<Tooltip trigger={'mouse'} // 必填:事件类型: click, mouse*/}
+    {/*         placement={['left', 'top']} // 必填:弹出位置: left,right,top,bottom*/}
+    {/*         popup={() => <TipBox count={count}/>} // 选填:弹出组件*/}
+    {/*         gap={10}// 选填: 弹出组件与目标元素之间的间隔大小*/}
     {/*>*/}
-    {/*  <button*/}
-    {/*    style={({ background: 'red', position: 'absolute', left: '200px', top: '300px' })}*/}
-    {/*    onClick={() => handleEv()}*/}
-    {/*  >component*/}
-    {/*  </button>*/}
+    {/*  <button style={({ background: 'red', left: '30%', top: '30%', position: 'absolute' })} onClick={() => handleAdd()}>component</button>*/}
     {/*</Tooltip>*/}
-    <div>fengfeng123</div>
   </div>
 };
 

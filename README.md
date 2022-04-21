@@ -165,7 +165,15 @@ function App() {
 
 ```javascript
 import { Tooltip } from 'nicetoolfn'
- 
+
+const TipBox = (props: any) => {
+  return <div>
+    <p>~~~~{props.count}~~~</p>
+    <p>{Date.now()}</p>
+    <p>{props.count % 2}</p>
+  </div>
+}
+
 function App() {
   return (
     <Tooltip trigger={'click'} // 必填:事件类型: click, mouse

@@ -1,82 +1,137 @@
-import React, { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
-import { TransitionGroup, CSSTransition } from 'react-transition-group';
-import { IKeyVal, IPopupItem, IComponent, IComponentProps } from './interfac';
+import React, { useImperativeHandle, useMemo, useRef, useState, useContext, useEffect, useLayoutEffect } from 'react';
 import './style.less';
+import ReactDOM from "react-dom";
+import useTransition, { TKeyVal, TList } from "../../hook/useTransition";
+import { setRequestAnimationFrame } from "../../helpers/requestAnimationFrame";
 
-const POPUP_LIST: IPopupItem[] = []
-let forcedRefresh: Function = function () {};
+type TComponentProps = {};
+type TComponent = React.FC<TComponentProps>;
+type TTransition = [TKeyVal, TList[]]
+type TDefaultStyle = false | TTransition;
 
-function PopupGroup() {
-  const [refresh, updateRefresh] = useState(0);
-  const [popupList, updatePopupList] = useState<IPopupItem[]>([]);
+const PopupContext = React.createContext<{
+  deps: TKeyVal,
+  defaultStyle: TDefaultStyle
+}>({
+  deps: {},
+  defaultStyle: false
+});
+const _defaultStyle: TDefaultStyle = [{
+  opacity: 0,
+  transform: 'translateX(-50%) translateY(-50%) scale(1.185)'
+}, [
+  [150, {
+    transform: 'translateX(-50%) translateY(-50%) scale(1)',
+    opacity: 1
+  }],
+  [150, {
+    opacity: 0,
+    transform: 'translateX(-50%) translateY(-50%) scale(1.185)'
+  }]
+]]
 
-  const closePopup = (index: number, size: number = popupList.length) => {
-    popupList.splice(index, size);
-    POPUP_LIST.splice(index, size);
-    updatePopupList([...popupList]);
-  }
-  const emit = (data: IKeyVal, parentIdx: number) => {
-    popupList[parentIdx].childData = {
-      ...popupList[parentIdx].childData,
-      ...data
-    };
-    updatePopupList([...popupList]);
-  }
+const Popup = React.forwardRef((props: any, ref) => {
+  const _refDefaultStyle = useRef<TDefaultStyle>(false);
+  const [pointer, triggerPointer] = useState(-1);
+  const [popupList, triggerPopupList] = useState<TComponent[]>([]);
 
-  useEffect(() => {
-    updatePopupList([...POPUP_LIST]);
-  }, [refresh]);
-  useEffect(() => {
-    forcedRefresh = () => updateRefresh(Date.now());
-  });
-
-  return (<>
-    <CSSTransition in={popupList.length !== 0} timeout={300} classNames="nicetoolfnPopupMask">
-      <div className="nicetoolfn-mask"/>
-    </CSSTransition>
-    <TransitionGroup>
-      {popupList.map((item, index) => {
-        const Component = item.component;
-        const props: IComponentProps = {
-          childData: popupList[index].childData,
-          closePopup: () => closePopup(index, 1),
-          closeAllPopup: () => closePopup(0),
-          forcedRefresh: () => forcedRefresh(),
-          emit: (data: IKeyVal) => index !== 0 && emit(data, index - 1)
-        };
-        return (
-          <CSSTransition key={index} timeout={300} classNames="nicetoolfnPopupItem">
-            <Component {...props}/>
-          </CSSTransition>
-        )
-      })}
-    </TransitionGroup>
-  </>);
-}
-
-/**
- * @param {IComponent} component 函数组件或组件实例
- * */
-export default class Index {
-  constructor(public component: IComponent) {
-    this.init();
-  };
-
-  private root: HTMLElement | null = document.getElementById('nicetoolfn-modal');
-
-  private init() {
-    POPUP_LIST.push({ component: this.component, childData: {} });
-
-    if (this.root == null) {
-      this.root = document.createElement('div');
-      this.root.setAttribute('id', 'nicetoolfn-modal');
-      document.body.appendChild(this.root);
-
-      ReactDOM.render(<PopupGroup/>, this.root);
-    } else {
-      forcedRefresh();
+  const open = (component: TComponent, defaultStyle?: TTransition) => {
+    if (defaultStyle) {
+      _refDefaultStyle.current = defaultStyle;
     }
+    triggerPointer(pointer + 1);
+    triggerPopupList([...popupList, component]);
   }
+
+  const clear = () => {
+    if (popupList.length === 0) {
+      return;
+    }
+    triggerPointer(pointer - 1);
+
+    // 等待离开动画执行完毕，再删除对应的弹窗组件
+    setRequestAnimationFrame(() => {
+      triggerPopupList([...popupList.slice(0, -1)]);
+    }, clearTimeMs)
+  }
+
+  const PopupRoot = useMemo(() => {
+    return document.getElementById('nicetoolfn-popup') || (() => {
+      const div = document.createElement('div')
+      div.setAttribute('id', 'nicetoolfn-popup');
+      document.body.appendChild(div);
+      return div
+    })();
+  }, []);
+  const clearTimeMs = useMemo(() => {
+    return _refDefaultStyle.current ? _refDefaultStyle.current[1][0][0] : 150
+  }, [_refDefaultStyle.current])
+
+  useImperativeHandle(ref, () => ({
+    open,
+    clear
+  }));
+
+  return <PopupContext.Provider value={({
+    deps: props,
+    defaultStyle: _refDefaultStyle.current,
+  })}>
+    {ReactDOM.createPortal(
+      <PopupList
+        popupList={popupList}
+        pointer={pointer}
+      />, PopupRoot
+    )}
+  </PopupContext.Provider>
+})
+
+const PopupList = (props: any) => {
+  const { popupList, pointer } = props;
+  const [style, triggerStyle] = useTransition(
+    {},
+    [
+      [300, { opacity: 1, zIndex: 9 }],
+      [300, { opacity: 0, zIndex: -9 }]
+    ],
+  );
+
+  useLayoutEffect(() => {
+    triggerStyle(Number(pointer === -1));
+  }, [pointer]);
+
+  return <>
+    <div className="nicetoolfn-popup-mask" style={style}/>
+    {popupList.map((item: TComponent, index: number) => {
+      return <PopupItem key={index} funComponent={item} pointer={pointer} index={index}/>
+    })}
+  </>
 }
 
+const PopupItem = (props: any) => {
+  const { funComponent, pointer, index } = props
+  const { deps, defaultStyle } = useContext(PopupContext);
+  const _refStyle = useRef<TTransition>(defaultStyle || _defaultStyle);
+  const [style, triggerStyle] = useTransition(..._refStyle.current);
+
+  useEffect(() => {
+    // 消失操作
+    if (pointer === index - 1) {
+      triggerStyle(1)
+    }
+    // 显示操作
+    if (pointer === index) {
+      triggerStyle(0)
+    }
+  }, [pointer])
+
+  const FunComponent = funComponent;
+
+  return <>
+    {React.createElement('div', {
+      className: 'nicetoolfn-popup-item',
+      style
+    }, [FunComponent ? <FunComponent {...deps} key={index}/> : ''])}
+  </>;
+}
+
+export default Popup;

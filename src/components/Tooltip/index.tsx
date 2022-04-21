@@ -179,19 +179,6 @@ function computedOffset(placement: EPlacement[] | undefined, root: HTMLElement, 
 let timeout: NodeJS.Timeout;
 
 export default function (props: IProps) {
-  const PopupRoot = useMemo(() => {
-    return document.getElementById('nicetoolfn-tooltip') || (() => {
-      const div = document.createElement('div')
-      div.setAttribute('id', 'nicetoolfn-tooltip');
-      div.style.position = 'absolute';
-      div.style.left = '0';
-      div.style.top = '0';
-      div.style.width = '0';
-      div.style.height = '0';
-      document.body.appendChild(div);
-      return div
-    })();
-  }, []);
   const refRoot = useRef<HTMLElement>();
   const refPopup = useRef<HTMLElement>();
   const [style, updateStyle] = useTransition({
@@ -208,6 +195,20 @@ export default function (props: IProps) {
       opacity: 0
     }]
   ]);
+  const PopupRoot = useMemo(() => {
+    return document.getElementById('nicetoolfn-tooltip') || (() => {
+      const div = document.createElement('div')
+      div.setAttribute('id', 'nicetoolfn-tooltip');
+      div.style.position = 'absolute';
+      div.style.left = '0';
+      div.style.top = '0';
+      div.style.width = '0';
+      div.style.height = '0';
+      document.body.appendChild(div);
+      return div
+    })();
+  }, []);
+
   const Popup = () => {
     let Component = props.popup;
     const { trigger } = props;
@@ -226,6 +227,7 @@ export default function (props: IProps) {
         }
       }
     }[trigger];
+
     Component = typeof Component === 'function' ? <Component/> : Component;
     Component = React.createElement('div', {
       ref: refPopup,
@@ -263,7 +265,7 @@ export default function (props: IProps) {
       ...Root.props,
       ...event,
       ref: refRoot
-    }, [`123123123${Date.now()}`])
+    })
 
     return Root;
   }
@@ -290,6 +292,7 @@ export default function (props: IProps) {
     refPopup.current!.style.top = top + 'px';
     refPopup.current!.style.transformOrigin = origin;
   };
+
   return <>
     {Root()}
     {ReactDOM.createPortal(Popup(), PopupRoot)}
