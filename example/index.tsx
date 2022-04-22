@@ -22,30 +22,37 @@ const App = () => {
   }
 
   const handleEvNew = () => {
-    const aaa = () => [(props: any) => {
-      return <div>
+    /** _ref.current绑定组件实例，抛出两个事件
+     * _ref.current.open()
+     * @param { Element | (props)=>Element } 弹窗组件
+     * @param { Array<{ [key]:value },Array<Array<[ string, {[key]:value} ]>>> } 弹出动画
+     * _ref.current.clear()     关闭当前弹窗
+     * _ref.current.clearAll()  关闭全部弹窗
+     * */
+    (_ref.current as any).open(
+      (props: any) => (<div>
         <h1>fengfengss{props.count}</h1>
-        <button onClick={() => (_ref.current as any).open(...aaa())}>open</button>
+        <button onClick={() => handleEvNew()}>open</button>
         <button onClick={() => (_ref.current as any).clear()}>clear</button>
+        <button onClick={() => (_ref.current as any).clearAll()}>clearAll</button>
         <button onClick={() => props.handleAdd()}>add</button>
-      </div>
-    }, [{
-      opacity: 0,
-      transform: 'translateX(-50%) translateY(-50%) scale(1.185)'
-    }, [
-      [300, {
-        transform: 'translateX(-50%) translateY(-50%) scale(1)',
-        opacity: 1,
-        backgroundColor: 'red'
-      }],
-      [300, {
+      </div>),
+      [{
         opacity: 0,
-        transform: 'translateX(-50%) translateY(-50%) scale(1.185)',
-        backgroundColor: 'blue'
-      }]
-    ]]]
-    // @ts-ignore
-    _ref.current.open(...aaa())
+        transform: 'translateX(-50%) translateY(-50%) scale(1.185)'
+      }, [
+        [300, {
+          transform: 'translateX(-50%) translateY(-50%) scale(1)',
+          opacity: 1,
+          backgroundColor: 'red'
+        }],
+        [300, {
+          opacity: 0,
+          transform: 'translateX(-50%) translateY(-50%) scale(1.185)',
+          backgroundColor: 'blue'
+        }]
+      ]]
+    )
   }
   const handleEv = () => {
     new Popup2((props) => {
@@ -83,7 +90,7 @@ const App = () => {
       </button>
     </Tooltip>
     <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
-    <Tooltip trigger={'mouse'} // 必填:事件类型: click, mouse
+    <Tooltip trigger={'click'} // 必填:事件类型: click, mouse
              // placement={['bottom', 'left']} // 必填:弹出位置: left,right,top,bottom
              popup={<TipBox count={count } handleAdd={handleAdd}/>} // 选填:弹出组件
              gap={10}// 选填: 弹出组件与目标元素之间的间隔大小

@@ -1,4 +1,4 @@
-import React, { useImperativeHandle, useMemo, useRef, useState, useContext, useEffect, useLayoutEffect } from 'react';
+import React, { useImperativeHandle, useMemo, useRef, useState, useContext, useLayoutEffect } from 'react';
 import ReactDOM from "react-dom";
 import useTransition, { TKeyVal, TList } from "../../hook/useTransition";
 import { setRequestAnimationFrame } from "../../helpers/requestAnimationFrame";
@@ -30,7 +30,7 @@ const _defaultStyle: TDefaultStyle = [{
 ]]
 const _popupMaskStyle: TKeyVal = {
   position: 'fixed',
-  left: '50%',
+  left: '0',
   top: '0',
   right: '0',
   bottom: '0',
@@ -44,7 +44,8 @@ const _popupItemStyle: TKeyVal = {
   zIndex: '10'
 }
 
-const Popup = React.forwardRef((props: any, ref) => {
+type IProps_Popup = { [key: string]: any }
+const Popup = React.forwardRef((props: IProps_Popup, ref) => {
   const _refDefaultStyle = useRef<TDefaultStyle>(false);
   const [pointer, triggerPointer] = useState(-1);
   const [popupList, triggerPopupList] = useState<TComponent[]>([]);
@@ -61,11 +62,22 @@ const Popup = React.forwardRef((props: any, ref) => {
     if (popupList.length === 0) {
       return;
     }
+    if (popupList.length - 1 !== pointer) {
+      return;
+    }
     triggerPointer(pointer - 1);
 
     // 等待离开动画执行完毕，再删除对应的弹窗组件
     setRequestAnimationFrame(() => {
       triggerPopupList([...popupList.slice(0, -1)]);
+    }, clearTimeMs)
+  }
+
+  const clearAll = () => {
+    triggerPointer(-1);
+    // 等待离开动画执行完毕，再删除对应的弹窗组件
+    setRequestAnimationFrame(() => {
+      triggerPopupList([]);
     }, clearTimeMs)
   }
 
@@ -83,7 +95,8 @@ const Popup = React.forwardRef((props: any, ref) => {
 
   useImperativeHandle(ref, () => ({
     open,
-    clear
+    clear,
+    clearAll
   }));
 
   return <PopupContext.Provider value={({
@@ -99,7 +112,11 @@ const Popup = React.forwardRef((props: any, ref) => {
   </PopupContext.Provider>
 })
 
-const PopupList = (props: any) => {
+type IProps_PopupList = {
+  popupList: TComponent[]
+  pointer: number
+}
+const PopupList = (props: IProps_PopupList) => {
   const { popupList, pointer } = props;
   const [style, triggerStyle] = useTransition(
     { opacity: 0, zIndex: -9 },
@@ -121,20 +138,24 @@ const PopupList = (props: any) => {
   </>
 }
 
-const PopupItem = (props: any) => {
+type IProps_PopupItem = {
+  funComponent: TComponent
+  pointer: number
+  index: number
+}
+const PopupItem = (props: IProps_PopupItem) => {
   const { funComponent, pointer, index } = props
   const { deps, defaultStyle } = useContext(PopupContext);
   const _refStyle = useRef<TTransition>(defaultStyle || _defaultStyle);
   const [style, triggerStyle] = useTransition(..._refStyle.current);
 
-  useEffect(() => {
-    // 消失操作
-    if (pointer === index - 1) {
-      triggerStyle(1)
-    }
-    // 显示操作
-    if (pointer === index) {
-      triggerStyle(0)
+  useLayoutEffect(() => {
+    if (index === pointer) {
+      setTimeout(() => {
+        triggerStyle(0)
+      })
+    } else {
+      triggerStyle(1);
     }
   }, [pointer])
 

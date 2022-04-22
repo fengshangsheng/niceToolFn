@@ -57,10 +57,16 @@ const Tooltip = function (props: IProps) {
       gap
     );
 
+    const transition = _refPopup.current!.style.transition;
+
+    _refPopup.current!.style.transition = [transition, 'left 100ms', 'top 100ms'].join(',')
     _refPopup.current!.style.position = 'absolute';
     _refPopup.current!.style.left = left + 'px';
     _refPopup.current!.style.top = top + 'px';
     _refPopup.current!.style.transformOrigin = origin;
+    setTimeout(() => {
+      _refPopup.current!.style.transition = transition;
+    }, 100)
   };
 
   const { children, popup, trigger } = props;
