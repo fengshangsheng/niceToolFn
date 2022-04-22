@@ -15,6 +15,14 @@ const PopupContext = React.createContext<{
   deps: {},
   defaultStyle: false
 });
+
+const _popupItemStyle: TKeyVal = {
+  position: 'fixed',
+  left: '50%',
+  top: '50%',
+  transform: 'translateX(-50%) translateY(-50%)',
+  zIndex: '10'
+}
 const _defaultStyle: TDefaultStyle = [{
   opacity: 0,
   transform: 'translateX(-50%) translateY(-50%) scale(1.185)'
@@ -35,13 +43,6 @@ const _popupMaskStyle: TKeyVal = {
   right: '0',
   bottom: '0',
   backgroundColor: 'rgba(0, 0, 0, 0.3)'
-}
-const _popupItemStyle: TKeyVal = {
-  position: 'fixed',
-  left: '50%',
-  top: '50%',
-  backgroundColor: 'red',
-  zIndex: '10'
 }
 
 type IProps_Popup = { [key: string]: any }

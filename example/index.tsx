@@ -21,7 +21,7 @@ const App = () => {
     updateShow(count + 1);
   }
 
-  const handleEvNew = () => {
+  const handleEvNew = (ev: any) => {
     /** _ref.current绑定组件实例，抛出两个事件
      * _ref.current.open()
      * @param { Element | (props)=>Element } 弹窗组件
@@ -32,26 +32,27 @@ const App = () => {
     (_ref.current as any).open(
       (props: any) => (<div>
         <h1>fengfengss{props.count}</h1>
-        <button onClick={() => handleEvNew()}>open</button>
+        {/*<button onClick={() => handleEvNew()}>open</button>*/}
         <button onClick={() => (_ref.current as any).clear()}>clear</button>
         <button onClick={() => (_ref.current as any).clearAll()}>clearAll</button>
         <button onClick={() => props.handleAdd()}>add</button>
       </div>),
-      [{
-        opacity: 0,
-        transform: 'translateX(-50%) translateY(-50%) scale(1.185)'
-      }, [
-        [300, {
-          transform: 'translateX(-50%) translateY(-50%) scale(1)',
-          opacity: 1,
-          backgroundColor: 'red'
-        }],
-        [300, {
-          opacity: 0,
-          transform: 'translateX(-50%) translateY(-50%) scale(1.185)',
-          backgroundColor: 'blue'
-        }]
-      ]]
+      // [{
+      //   opacity: 0,
+      //   transform: 'scale(0)',
+      //   backgroundColor: 'yellow'
+      // }, [
+      //   [300, {
+      //     transform: 'scale(1)',
+      //     opacity: 1,
+      //     backgroundColor: 'red'
+      //   }],
+      //   [300, {
+      //     opacity: 0,
+      //     transform: 'scale(1.185)',
+      //     backgroundColor: 'yellow'
+      //   }]
+      // ]]
     )
   }
   const handleEv = () => {
@@ -77,7 +78,7 @@ const App = () => {
       <button onClick={() => handleEv()}>open old</button>
     </p>
     <p>
-      <button onClick={() => handleEvNew()}>open new</button>
+      <button onClick={handleEvNew}>open new</button>
     </p>
     <Popup ref={_ref} count={count} handleAdd={handleAdd}/>
     <Tooltip trigger={'click'} // 必填:事件类型: click, mouse
@@ -91,8 +92,8 @@ const App = () => {
     </Tooltip>
     <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
     <Tooltip trigger={'click'} // 必填:事件类型: click, mouse
-             // placement={['bottom', 'left']} // 必填:弹出位置: left,right,top,bottom
-             popup={<TipBox count={count } handleAdd={handleAdd}/>} // 选填:弹出组件
+      // placement={['bottom', 'left']} // 必填:弹出位置: left,right,top,bottom
+             popup={<TipBox count={count} handleAdd={handleAdd}/>} // 选填:弹出组件
              gap={10}// 选填: 弹出组件与目标元素之间的间隔大小
     >
       <button style={({ background: 'red', left: '50%', top: 'auto', position: 'absolute' })} onClick={() => handleAdd()}>component</button>
