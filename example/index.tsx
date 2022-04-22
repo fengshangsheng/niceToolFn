@@ -1,7 +1,7 @@
 import 'react-app-polyfill/ie9';
 import React, { useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { Popup, Popup2, Tooltip } from '../dist'; // 此处存在parcel alias 见下文
+import { Popup, Popup2, Tooltip, LoopFrames, useCountDown } from '../dist'; // 此处存在parcel alias 见下文
 // import '../dist/nicetoolfn.css';
 import './index.less';
 
@@ -17,6 +17,7 @@ const TipBox = (props: any) => {
 const App = () => {
   const [count, updateShow] = useState(0);
   const _ref = useRef();
+  const [day, hour, min, ms] = useCountDown(new Date(new Date().toLocaleDateString()).getTime() - 1)
   const handleAdd = () => {
     updateShow(count + 1);
   }
@@ -70,6 +71,7 @@ const App = () => {
     });
   }
   return <div>
+    {day}, {hour}, {min}, {ms}
     <p>{count}</p>
     <p>
       <button onClick={() => handleAdd()}>add</button>
@@ -106,6 +108,23 @@ const App = () => {
     {/*>*/}
     {/*  <button style={({ background: 'red', left: '30%', top: '30%', position: 'absolute' })} onClick={() => handleAdd()}>component</button>*/}
     {/*</Tooltip>*/}
+    <LoopFrames
+      frames={[
+        'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00000.png',
+        'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00001.png',
+        'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00002.png',
+        'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00003.png',
+        'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00004.png',
+        'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00005.png',
+        'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00006.png',
+        'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00007.png',
+        'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00008.png',
+        'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00009.png',
+        'http://img-game.yy.com/szhuodong/test/00%E7%89%9B_00010.png'
+      ]}
+      pace={100} // 帧切换速率
+      className={'myclass'}
+    />
   </div>
 };
 
