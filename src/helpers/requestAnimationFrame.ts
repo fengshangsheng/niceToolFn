@@ -3,11 +3,12 @@ let canceller: number = 0;
 const clearAnimationFrame = () => {
   canceller && cancelAnimationFrame(canceller);
 }
+
 export function setRequestAnimationFrame(
   fn: Function,
   pace: number = 0,
-  startMs = performance.now()
 ): Function {
+  const startMs = performance.now()
   const init = () => {
     clearAnimationFrame();
     canceller = requestAnimationFrame(() => {

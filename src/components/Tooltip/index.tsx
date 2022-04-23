@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import ReactDOM from "react-dom";
 import useTransition from "../../hook/useTransition";
 import { setRequestAnimationFrame } from "../../helpers/requestAnimationFrame";
@@ -39,11 +39,13 @@ const Tooltip = function (props: IProps) {
     step === 1 && (_refPopup.current!.style.transform = 'scale(0)')
   });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     initStyle();
 
     window.addEventListener('scroll', () => {
-      setRequestAnimationFrame(initStyle, 300);
+      setRequestAnimationFrame(()=>{
+        initStyle()
+      }, 100);
     })
     return window.removeEventListener('scroll', () => {});
   }, [JSON.stringify(style)]);

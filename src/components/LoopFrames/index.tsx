@@ -1,6 +1,5 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { setLoopRequestAnimationFrame } from '../../helpers/requestAnimationFrame';
-import './style.less';
 
 type IProps = {
   frames: string[]
@@ -8,46 +7,56 @@ type IProps = {
   pace?: number
 }
 
+const _styleUl: { [key: string]: any } = {
+  display: 'inline-block',
+  position: 'relative'
+}
+const _styleLi: { [key: string]: any } = {
+  position: 'absolute',
+  userSelect: 'none',
+  left: 0,
+  top: 0
+}
+
+let clearFn: Function;
 export default function (props: IProps) {
   // 已加载的帧数量
-  const [loadCount, updateLoadCount] = useState<number[]>([]);
+  const [loadFrame, triggerLoadFrame] = useState<string[]>([]);
   // 当前显示的关键帧
   const [frame, updateFrame] = useState(0);
   const _refFrame = useRef(frame);
 
-  const hasLoadEnd = useMemo<boolean>(() => {
-    return loadCount.length === props.frames.length
-  }, [loadCount.length]);
-
-  const updateLoaded = (index: number) => {
-    const flag = loadCount.includes(index)
+  const updateLoaded = (frame: string) => {
+    const flag = loadFrame.includes(frame)
     if (!flag) {
-      updateLoadCount([...loadCount, index]);
+      triggerLoadFrame([...loadFrame, frame]);
     }
   }
 
-  useLayoutEffect(() => {
-    let clearFn: Function;
+  const hasLoadEnd = useMemo<boolean>(() => {
+    console.log('hasLoadEnd',loadFrame.length === props.frames.length);
+    return loadFrame.length === props.frames.length
+  }, [loadFrame.length]);
+
+  useEffect(() => {
     if (hasLoadEnd) {
+      console.log('useEffect', hasLoadEnd);
       clearFn = setLoopRequestAnimationFrame(() => {
-        const newFrame = _refFrame.current + 1;
-        updateFrame(newFrame > props.frames.length - 1 ? 0 : newFrame)
+        let newFrame = _refFrame.current + 1;
+        newFrame = newFrame > props.frames.length - 1 ? 0 : newFrame;
+        _refFrame.current = newFrame;
+        updateFrame(newFrame);
       }, props.pace || 60);
     }
     return () => clearFn && clearFn();
   }, [hasLoadEnd]);
 
-  useEffect(() => {
-    _refFrame.current = frame;
-  }, [frame]);
-
-  return <ul className={`loopFrames ${props.className}`}>
+  return <ul className={props.className || ''} style={_styleUl}>
     {props.frames.map((item, index) => (
-      <li key={index}>
+      <li key={index} style={({ ..._styleLi, opacity: frame === index ? 1 : 0 })}>
         <img src={item} alt=""
-             className={frame === index ? '' : 'disNone'}
-             onLoad={() => updateLoaded(index)}
-             onError={() => {updateLoaded(index)}}
+             onLoad={() => updateLoaded(item)}
+             onError={() => {updateLoaded(item)}}
         />
       </li>
     ))}

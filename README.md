@@ -10,20 +10,26 @@
 import { Popup } from 'nicetoolfn';
 
 const App = () => {
-  const [count, updateShow] = useState(0);
+  const [count, triggerCount] = useState(0);
   const _ref = useRef();
-
+  
+  const handleAdd = () => {
+    triggerCount(count + 1);
+  }
   const handleEvNew = () => {
     /** _ref.current绑定组件实例，抛出两个事件
-     * _ref.current.open()  
+     * _ref.current.open()
      * @param { Element | (props)=>Element } 弹窗组件
-     * @param { Array<{ [key]:value },Array<Array<[ string, {[key]:value} ]>>> } 弹出动画 
-     * _ref.current.clear()  关闭弹窗
+     * @param { Array<{ [key]:value },Array<Array<[ string, {[key]:value} ]>>> } 弹出动画
+     * _ref.current.clear()     关闭当前弹窗
+     * _ref.current.clearAll()  关闭全部弹窗
      * */
     _ref.current.open(
       (props: any) => (<div>
         <h1>fengfengss{props.count}</h1>
+        <button onClick={() => handleEvNew()}>open</button>
         <button onClick={() => _ref.current.clear()}>clear</button>
+        <button onClick={() => _ref.current.clearAll()}>clearAll</button>
         <button onClick={() => props.handleAdd()}>add</button>
       </div>),
       [{
@@ -45,12 +51,14 @@ const App = () => {
   }
 
   return <>
+    {count}
+    <button onClick={() => handleAdd()}>add</button>
     <button onClick={() => handleOpen()}>open</button>
     {/* 
       将数据传递至<Popup/>,
       可在 _ref.current.open((props)=><></>) 中获取即时最新的数据 
     */}
-    <Popup ref={_ref} count={count} handleAdd={handleAdd}/>
+    <Popup ref={_ref} count={count} />
   </>
 }
 ReactDOM.render(<App/>, document.getElementById('root'));

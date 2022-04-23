@@ -9,6 +9,31 @@ let canceller: Function;
 const useTransition = function (_default: TKeyVal, list: TList[], animateEnd?: Function): TReturn {
   const [_step, updateStep] = useState<number>(-1);
   const [item, updateItem] = useState<TKeyVal>(_default);
+
+  useLayoutEffect(() => {
+    if (_step === -1) {
+      return;
+    }
+
+    const [time, style] = list[_step];
+    const [, preStyle] = list[_step - 1] ? list[_step - 1] : list[list.length - 1]
+    const newStyle = { ...preStyle, ...style }
+
+    const transition = Object.keys(newStyle).map((item) => {
+      if (item == 'transition') {
+        throw new Error('nicetoolfn => useTransitions => 不可输入:transition');
+      }
+
+      item = item.replace(/[A-Z]/g, '-$&').toLowerCase();
+
+      return `${item} ${time}ms`
+    }).join(',');
+
+    updateItem({ transition, ...style });
+
+    initCallback(_step);
+  }, [_step]);
+
   const initCallback = (newStep: number) => {
     if (animateEnd) {
       canceller && canceller();
@@ -34,32 +59,6 @@ const useTransition = function (_default: TKeyVal, list: TList[], animateEnd?: F
 
     updateStep(newStep);
   }
-  useLayoutEffect(() => {
-    if (_step === -1) {
-      return;
-    }
-
-    const [time, style] = list[_step];
-    const [, preStyle] = list[_step - 1] ? list[_step - 1] : list[list.length - 1]
-    const newStyle = {
-      ...preStyle,
-      ...style
-    }
-
-    const transition = Object.keys(newStyle).map((item) => {
-      if (item == 'transition') {
-        throw new Error('nicetoolfn => useTransitions => 不可输入:transition');
-      }
-
-      item = item.replace(/[A-Z]/g, '-$&').toLowerCase();
-
-      return `${item} ${time}ms`
-    }).join(',');
-
-    updateItem({ transition, ...style });
-
-    initCallback(_step);
-  }, [_step]);
 
   return [item, trigger, _step]; // [style对象, 切换方法, 当前步伐];
 }
