@@ -3,7 +3,7 @@ import Popup2 from './components/Popup2';
 import LoopFrames from './components/LoopFrames';
 import Tooltip from './components/Tooltip';
 import { Cookie, CountDown } from './uitls';
-import { usePages } from './hook';
+import { usePages, useFirstState } from './hook';
 
 export {
   Popup,
@@ -12,5 +12,6 @@ export {
   Tooltip,
   Cookie,
   CountDown,
-  usePages
+  usePages,
+  useFirstState
 };

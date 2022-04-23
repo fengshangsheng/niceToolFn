@@ -1,7 +1,7 @@
 import 'react-app-polyfill/ie9';
 import React, { useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { Popup, Popup2, Tooltip } from '../dist'; // 此处存在parcel alias 见下文
+import { Popup, Popup2, Tooltip, useFirstState } from '../dist'; // 此处存在parcel alias 见下文
 // import '../dist/nicetoolfn.css';
 import './index.less';
 
@@ -15,6 +15,7 @@ const TipBox = (props: any) => {
 }
 
 const App = () => {
+  const isFirst = useFirstState();
   const [count, updateShow] = useState(0);
   const _ref = useRef();
   const handleAdd = () => {
@@ -84,8 +85,8 @@ const App = () => {
     </Tooltip>
     <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
     <Tooltip trigger={'mouse'} // 必填:事件类型: click, mouse
-             // placement={['bottom', 'left']} // 必填:弹出位置: left,right,top,bottom
-             popup={<TipBox count={count } handleAdd={handleAdd}/>} // 选填:弹出组件
+      // placement={['bottom', 'left']} // 必填:弹出位置: left,right,top,bottom
+             popup={<TipBox count={count} handleAdd={handleAdd}/>} // 选填:弹出组件
              gap={10}// 选填: 弹出组件与目标元素之间的间隔大小
     >
       <button style={({ background: 'red', left: '50%', top: 'auto', position: 'absolute' })} onClick={() => handleAdd()}>component</button>
