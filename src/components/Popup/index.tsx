@@ -1,19 +1,24 @@
-import React, { useImperativeHandle, useMemo, useRef, useState, useContext, useLayoutEffect } from 'react';
+import React, { useImperativeHandle, useState, useContext, useLayoutEffect } from 'react';
 import ReactDOM from "react-dom";
-import useTransition, { TKeyVal, TList } from "../../hook/useTransition";
+import useTransition, { TKeyVal } from "../../hook/useTransition";
 import { setRequestAnimationFrame } from "../../helpers/requestAnimationFrame";
 
-type TComponentProps = {};
+type TComponentProps = {
+  [key: string]: any
+};
 type TComponent = React.FC<TComponentProps>;
-type TTransition = [TKeyVal, TList[]]
-type TDefaultStyle = false | TTransition;
+type TList = [number, TKeyVal];
 
 const PopupContext = React.createContext<{
-  deps: TKeyVal,
-  defaultStyle: TDefaultStyle
+  deps: TKeyVal
+  popupList: TComponent[]
+  pointer: number
+  transition: TList[]
 }>({
   deps: {},
-  defaultStyle: false
+  popupList: [],
+  pointer: -1,
+  transition: []
 });
 
 const _popupItemStyle: TKeyVal = {
@@ -23,112 +28,85 @@ const _popupItemStyle: TKeyVal = {
   transform: 'translateX(-50%) translateY(-50%)',
   zIndex: '10'
 }
-const _defaultStyle: TDefaultStyle = [{
-  opacity: 0,
-  transform: 'translateX(-50%) translateY(-50%) scale(1.185)'
-}, [
-  [150, {
-    transform: 'translateX(-50%) translateY(-50%) scale(1)',
-    opacity: 1
-  }],
-  [150, {
-    opacity: 0,
-    transform: 'translateX(-50%) translateY(-50%) scale(1.185)'
-  }]
-]]
+
 const _popupMaskStyle: TKeyVal = {
   position: 'fixed',
-  left: '0',
-  top: '0',
-  right: '0',
-  bottom: '0',
+  left: 0,
+  top: 0,
+  right: 0,
+  bottom: 0,
   backgroundColor: 'rgba(0, 0, 0, 0.3)'
 }
 
-type IProps_Popup = { [key: string]: any }
-const Popup = React.forwardRef((props: IProps_Popup, ref) => {
-  const _refDefaultStyle = useRef<TDefaultStyle>(false);
-  const [pointer, triggerPointer] = useState(-1);
-  const [popupList, triggerPopupList] = useState<TComponent[]>([]);
+const _popupTransition: TList[] = [
+  [300, {
+    transform: 'translateX(-50%) translateY(-50%) scale(1)',
+    opacity: 0
+  }],
+  [300, {
+    transform: 'translateX(-50%) translateY(-50%) scale(1.185)',
+    opacity: 1
+  }]
+]
 
-  const open = (component: TComponent, defaultStyle?: TTransition) => {
-    if (defaultStyle) {
-      _refDefaultStyle.current = defaultStyle;
-    }
-    triggerPointer(pointer + 1);
-    triggerPopupList([...popupList, component]);
-  }
-
-  const clear = () => {
-    if (popupList.length === 0) {
-      return;
-    }
-    if (popupList.length - 1 !== pointer) {
-      return;
-    }
-    triggerPointer(pointer - 1);
-
-    // 等待离开动画执行完毕，再删除对应的弹窗组件
-    setRequestAnimationFrame(() => {
-      triggerPopupList([...popupList.slice(0, -1)]);
-    }, clearTimeMs)
-  }
-
-  const clearAll = () => {
-    triggerPointer(-1);
-    // 等待离开动画执行完毕，再删除对应的弹窗组件
-    setRequestAnimationFrame(() => {
-      triggerPopupList([]);
-    }, clearTimeMs)
-  }
-
-  const PopupRoot = useMemo(() => {
-    return document.getElementById('nicetoolfn-popup') || (() => {
-      const div = document.createElement('div')
-      div.setAttribute('id', 'nicetoolfn-popup');
-      document.body.appendChild(div);
-      return div
-    })();
-  }, []);
-  const clearTimeMs = useMemo(() => {
-    return _refDefaultStyle.current ? _refDefaultStyle.current[1][0][0] : 150
-  }, [_refDefaultStyle.current])
-
-  useImperativeHandle(ref, () => ({
-    open,
-    clear,
-    clearAll
-  }));
-
-  return <PopupContext.Provider value={({
-    deps: props,
-    defaultStyle: _refDefaultStyle.current,
-  })}>
-    {ReactDOM.createPortal(
-      <PopupList
-        popupList={popupList}
-        pointer={pointer}
-      />, PopupRoot
-    )}
-  </PopupContext.Provider>
-})
-
-type IProps_PopupList = {
-  popupList: TComponent[]
-  pointer: number
+const rootEle = () => {
+  return document.getElementById('nicetoolfn-popup') || (() => {
+    const div = document.createElement('div')
+    div.setAttribute('id', 'nicetoolfn-popup');
+    document.body.appendChild(div);
+    return div
+  })()
 }
-const PopupList = (props: IProps_PopupList) => {
-  const { popupList, pointer } = props;
-  const [style, triggerStyle] = useTransition(
-    { opacity: 0, zIndex: -9 },
-    [
-      [300, { opacity: 1, zIndex: 9 }],
-      [300, { opacity: 0, zIndex: -9 }]
-    ],
-  );
+
+let canceller: () => void;
+// let toInMs: number = 0;
+// let toOutMs: number = 0;
+
+type IProps_PopupItem = {
+  funComponent: TComponent
+  pointer: number
+  index: number
+}
+const PopupItem = (props: IProps_PopupItem) => {
+  const { transition } = useContext(PopupContext);
+  const { funComponent, pointer, index } = props
+  const { deps } = useContext(PopupContext);
+  const [style, triggerStyle] = useTransition(transition);
 
   useLayoutEffect(() => {
-    triggerStyle(Number(pointer === -1));
+    index !== pointer && triggerStyle(0);
+    index === pointer && setTimeout(() => {
+      triggerStyle(1);
+    });
+  }, [pointer])
+
+  const FunComponent = funComponent;
+  return <>
+    {React.createElement('div', {
+      className: 'nicetoolfn-popup-item',
+      style: { ..._popupItemStyle, ...style }
+    }, [
+      typeof FunComponent === 'function' && <FunComponent {...deps} key={index}/>,
+      typeof FunComponent === 'object' && React.cloneElement(FunComponent, {
+        ...(FunComponent as React.ReactElement).props,
+        ...deps,
+        key: index
+      })
+    ])}
+  </>;
+}
+
+const PopupList = () => {
+  const { popupList, pointer, transition } = useContext(PopupContext);
+
+  const [style, triggerStyle] = useTransition([
+    [transition[0][0], { opacity: 0, zIndex: -10 }],
+    [transition[1][0], { opacity: 1, zIndex: 10 }]
+  ]);
+
+  useLayoutEffect(() => {
+    pointer === -1 && triggerStyle(0);
+    pointer !== -1 && triggerStyle(1);
   }, [pointer]);
 
   return <>
@@ -139,35 +117,62 @@ const PopupList = (props: IProps_PopupList) => {
   </>
 }
 
-type IProps_PopupItem = {
-  funComponent: TComponent
-  pointer: number
-  index: number
-}
-const PopupItem = (props: IProps_PopupItem) => {
-  const { funComponent, pointer, index } = props
-  const { deps, defaultStyle } = useContext(PopupContext);
-  const _refStyle = useRef<TTransition>(defaultStyle || _defaultStyle);
-  const [style, triggerStyle] = useTransition(..._refStyle.current);
+type IProps_Popup = { [key: string]: any }
+const Popup = React.forwardRef((props: IProps_Popup, ref) => {
+  const [popupList, triggerPopupList] = useState<TComponent[]>([]);
+  const [pointer, triggerPointer] = useState(-1);
+  const [transition, triggerTransition] = useState(_popupTransition);
 
-  useLayoutEffect(() => {
-    if (index === pointer) {
-      setTimeout(() => {
-        triggerStyle(0)
-      })
-    } else {
-      triggerStyle(1);
+  const open = (component: TComponent, transition?: TList[]) => {
+    if (transition) {
+      triggerTransition(transition);
     }
-  }, [pointer])
 
-  const FunComponent = funComponent;
+    triggerPopupList([...popupList, component]);
+    triggerPointer(pointer + 1);
+  }
 
-  return <>
-    {React.createElement('div', {
-      className: 'nicetoolfn-popup-item',
-      style: { ..._popupItemStyle, ...style }
-    }, [FunComponent ? <FunComponent {...deps} key={index}/> : ''])}
-  </>;
-}
+  const clear = () => {
+    if (popupList.length === 0) {
+      return;
+    }
+    if (pointer !== popupList.length - 1) {
+      return;
+    }
 
+    triggerPointer(pointer - 1);
+
+    // 等待离开动画执行完毕，再删除对应的弹窗组件
+    canceller && canceller();
+    canceller = setRequestAnimationFrame(() => {
+      triggerPopupList(popupList.slice(0, -1));
+    }, transition[0][0])
+  }
+  const clearAll = () => {
+    triggerPointer(-1);
+    setRequestAnimationFrame(() => {
+      triggerPopupList([]);
+    }, transition[0][0])
+  }
+
+  useImperativeHandle(ref, () => ({
+    open,
+    clear,
+    clearAll
+  }));
+
+  return <PopupContext.Provider value={({
+    deps: {
+      ...props,
+      clear,
+      clearAll,
+      open
+    },
+    popupList,
+    pointer,
+    transition
+  })}>
+    {ReactDOM.createPortal(<PopupList/>, rootEle())}
+  </PopupContext.Provider>
+})
 export default Popup;

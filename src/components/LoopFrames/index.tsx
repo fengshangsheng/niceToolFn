@@ -34,13 +34,11 @@ export default function (props: IProps) {
   }
 
   const hasLoadEnd = useMemo<boolean>(() => {
-    console.log('hasLoadEnd',loadFrame.length === props.frames.length);
     return loadFrame.length === props.frames.length
   }, [loadFrame.length]);
 
   useEffect(() => {
     if (hasLoadEnd) {
-      console.log('useEffect', hasLoadEnd);
       clearFn = setLoopRequestAnimationFrame(() => {
         let newFrame = _refFrame.current + 1;
         newFrame = newFrame > props.frames.length - 1 ? 0 : newFrame;

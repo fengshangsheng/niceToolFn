@@ -1,64 +1,20 @@
 `npm install --save nicetoolfn`
 
-### 方法
-
+### Hooks
 <details>
-<summary style="font-size: 18px; font-weight: bold">🔥 Popup---弹窗</summary>
+<summary style="font-size: 18px; font-weight: bold">🔥 useCountDown---倒计时</summary>
 <pre style="padding: 0;font-size: 14px;background-color: transparent;">
 
 ```javascript
-import { Popup } from 'nicetoolfn';
-
 const App = () => {
-  const [count, triggerCount] = useState(0);
-  const _ref = useRef();
+  const [time, triggerTimeMs] = useCountDown(new Date(new Date().toLocaleDateString()).setHours(12, 30, 30))
   
-  const handleAdd = () => {
-    triggerCount(count + 1);
-  }
-  const handleEvNew = () => {
-    /** _ref.current绑定组件实例，抛出两个事件
-     * _ref.current.open()
-     * @param { Element | (props)=>Element } 弹窗组件
-     * @param { Array<{ [key]:value },Array<Array<[ string, {[key]:value} ]>>> } 弹出动画
-     * _ref.current.clear()     关闭当前弹窗
-     * _ref.current.clearAll()  关闭全部弹窗
-     * */
-    _ref.current.open(
-      (props: any) => (<div>
-        <h1>fengfengss{props.count}</h1>
-        <button onClick={() => handleEvNew()}>open</button>
-        <button onClick={() => _ref.current.clear()}>clear</button>
-        <button onClick={() => _ref.current.clearAll()}>clearAll</button>
-        <button onClick={() => props.handleAdd()}>add</button>
-      </div>),
-      [{
-        opacity: 0,
-        transform: 'translateX(-50%) translateY(-50%) scale(1.185)'
-      }, [
-        [300, {
-          transform: 'translateX(-50%) translateY(-50%) scale(1)',
-          opacity: 1,
-          backgroundColor: 'red'
-        }],
-        [300, {
-          opacity: 0,
-          transform: 'translateX(-50%) translateY(-50%) scale(1.185)',
-          backgroundColor: 'blue'
-        }]
-      ]]
-    )
-  }
-
   return <>
-    {count}
-    <button onClick={() => handleAdd()}>add</button>
-    <button onClick={() => handleOpen()}>open</button>
-    {/* 
-      将数据传递至<Popup/>,
-      可在 _ref.current.open((props)=><></>) 中获取即时最新的数据 
-    */}
-    <Popup ref={_ref} count={count} />
+    <p>{time}</p>
+    <button onClick={() => {
+      // 重新设置倒计时时间
+      triggerTimeMs(new Date(new Date().toLocaleDateString()).setHours(23, 59, 59))}
+    }>set new countDown</button>
   </>
 }
 ReactDOM.render(<App/>, document.getElementById('root'));
@@ -66,35 +22,8 @@ ReactDOM.render(<App/>, document.getElementById('root'));
 
 </pre>
 </details>
-
 <details>
-<summary style="font-size: 18px; font-weight: bold">🔥 CountDown---倒计时</summary>
-<pre style="padding: 0;font-size: 14px;background-color: transparent;">
 
-```javascript
-import { CountDown } from 'nicetoolfn';
-
-const target = new CountDown(
-  '2021-08-08T00:00:00', // 换成时间戳也行
-  {
-    day: true, hour: true, minute: true, milli: true, // [day,hour,minute,milli]需要返回什么，就相应的设置为true,否则不填写即可
-    callback: (data: {[key: number]:string}|false) => {
-      if (data === false) {
-        // 倒计时结束了
-      }
-      updateTime({...data});
-    }
-  }
-)
-target.stopCountDown(); // 拿到实例后，停止倒计时
-```
-
-</pre>
-</details>
-
-### Hooks
-
-<details>
 <summary style="font-size: 18px; font-weight: bold">🔥 usePages---分页</summary>
 <pre style="padding: 0;font-size: 14px;background-color: transparent;">
 
@@ -122,10 +51,9 @@ import { usePages } from 'nicetoolfn'
 
 const [
   style, // 当前激活的css样式对象
-  updateStyle // 更新激活的css对象
+  updateStyle, // 更新激活的css对象
+  step // 当前最新步伐
 ] = useTransition(
-  // 初始化默认样式
-  {opacity: 0, transform: 'scale(0)'},
   // 切换的样式列表
   [
     [100, {
@@ -138,10 +66,10 @@ const [
       opacity: 0
     }]
   ],
-  (step: number) => {
+  // css切换完成且动画执行完成后的回调
+  (newStep: number, oldStep: number) => {
     // step 标识当前激活样式list的索引
-    // 当css样式切换成功, 会执行当前回调函数
-    // 初始化时, 当前函数不执行
+    // 初始化不执行
   }
 );
 ```
@@ -206,3 +134,79 @@ function App() {
 </pre>
 </details>
 
+<details>
+<summary style="font-size: 18px; font-weight: bold">🔥 Popup---弹窗</summary>
+<pre style="padding: 0;font-size: 14px;background-color: transparent;">
+
+```javascript
+import { Popup } from 'nicetoolfn';
+
+const Modal = (props) => {
+  return <div>
+    <h1>!!!!!!{props.count}</h1>
+    <button onClick={() => props.handleOpen()}>open</button>
+    <button onClick={() => props.clear()}>clear</button>
+    <button onClick={() => props.clearAll()}>clearAll</button>
+    <button onClick={() => props.handleAdd(props.count + 1)}>add</button>
+  </div>
+}
+const App = () => {
+  const [count, triggerCount] = useState(0);
+  const _ref = useRef<any>();
+
+  const handleAdd = () => {
+    triggerCount(count + 1);
+  }
+  const handleOpen = () => {
+    /** _ref.current绑定组件实例，抛出两个事件
+     * _ref.current.open()
+     * @param { Element | (props)=>Element } 弹窗组件
+     * @param { Array<Array<[ string, {[key]:value} ]>> } 弹出动画
+     * _ref.current.clear()     关闭当前弹窗
+     * _ref.current.clearAll()  关闭全部弹窗
+     * */
+    _ref.current.open(
+      <Modal/>
+      // (props: any) => (<>
+      //   <h1>~~~~~~{props.count}</h1>
+      //   <button onClick={() => handleOpen()}>open</button>
+      //   <button onClick={() => _ref.current.clear()}>clear</button>
+      //   <button onClick={() => _ref.current.clearAll()}>clearAll</button>
+      //   <button onClick={() => props.handleAdd(props.count + 1)}>add</button>
+      // </>)
+      ,
+      // 选填，可自定义动画
+      [
+        [200, {
+          transform: 'translateX(-50%) translateY(-50%) scale(1)',
+          opacity: 0,
+          backgroundColor: 'yellow'
+        }],
+        [200, {
+          opacity: 1,
+          transform: 'translateX(-50%) translateY(-50%) scale(2.185)',
+          backgroundColor: 'blue'
+        }]
+      ]
+    )
+  }
+
+  return <>
+    {count}
+    <button onClick={() => handleAdd()}>add</button>
+    <button onClick={() => handleOpen()}>open</button>
+    {/*
+      将数据传递至<Popup/>,
+      可在 _ref.current.open((props)=><></>) 中获取即时最新的数据
+    */}
+    <Popup ref={_ref} count={count} handleAdd={handleAdd} handleOpen={handleOpen}/>
+  </>
+}
+
+ReactDOM.render(<App/>, document.getElementById('root'));
+```
+
+</pre>
+</details>
+
+### 方法

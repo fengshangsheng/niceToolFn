@@ -1,66 +1,80 @@
-import { useLayoutEffect, useState } from "react";
-import { setRequestAnimationFrame } from './../helpers/requestAnimationFrame';
+import { useLayoutEffect, useRef, useState } from "react";
+import { setRequestAnimationFrame } from '../helpers/requestAnimationFrame';
+import { useFirstState } from "./index";
 
 export type TKeyVal = { [key: string]: any }
 export type TReturn = [TKeyVal, Function, number];
 export type TList = [number, TKeyVal];
 
+const filterTransition = [
+  'z-index',
+  'transition',
+  'display',
+]
+
 let canceller: Function;
-const useTransition = function (_default: TKeyVal, list: TList[], animateEnd?: Function): TReturn {
-  const [_step, updateStep] = useState<number>(-1);
-  const [item, updateItem] = useState<TKeyVal>(_default);
+const useTransition = function (styleList: TList[], animateEnd?: (_new: number, _old: number) => void): TReturn {
+  const isFirst = useFirstState();
+  const _refOldStep = useRef(-1);
+  const [step, triggerStep] = useState<number>(0);
+  const [style, triggerStyle] = useState<TKeyVal>(styleList[step][1]);
 
   useLayoutEffect(() => {
-    if (_step === -1) {
+    if (isFirst) {
       return;
     }
 
-    const [time, style] = list[_step];
-    const [, preStyle] = list[_step - 1] ? list[_step - 1] : list[list.length - 1]
-    const newStyle = { ...preStyle, ...style }
+    const style = initStyle();
+    triggerStyle(style);
 
-    const transition = Object.keys(newStyle).map((item) => {
-      if (item == 'transition') {
-        throw new Error('nicetoolfn => useTransitions => 不可输入:transition');
-      }
+    initCallback();
+  }, [step]);
 
-      item = item.replace(/[A-Z]/g, '-$&').toLowerCase();
-
-      return `${item} ${time}ms`
-    }).join(',');
-
-    updateItem({ transition, ...style });
-
-    initCallback(_step);
-  }, [_step]);
-
-  const initCallback = (newStep: number) => {
+  const initCallback = () => {
     if (animateEnd) {
       canceller && canceller();
-      canceller = setRequestAnimationFrame(() => animateEnd(newStep), list[newStep][0]);
+      canceller = setRequestAnimationFrame(
+        () => animateEnd(step, _refOldStep.current),
+        styleList[step][0]
+      );
     }
   }
+  const initStyle = () => {
+    const [time, newStyle] = styleList[step];
+    const preStyle = styleList[_refOldStep.current][1];
 
-  const trigger = (pointer?: number) => {
-    let newStep: number;
+    const transition = isFirst ? 'none' : initTransition(style, time);
 
-    if (typeof pointer === 'undefined') {
-      if (_step === -1) {
-        newStep = 0
-      } else {
-        newStep = _step === list.length - 1 ? 0 : _step + 1;
-      }
-    } else {
-      if (pointer > list.length || pointer < 0) {
-        throw new Error('nicetoolfn => Tooltip => pointer:阙值错误,pointer不可超过数组length');
-      }
-      newStep = pointer;
+    return {
+      ...preStyle,
+      ...newStyle,
+      transition
     }
+  }
+  const initTransition = (style: TKeyVal, time: number) => {
+    const styleKey = Object.keys(style)
+      .map((item) => {
+        item = item.replace(/[A-Z]/g, '-$&').toLowerCase();
+        return item;
+      })
+      .filter((key) => {
+        return !filterTransition.includes(key)
+      });
 
-    updateStep(newStep);
+    const transition = styleKey.map((item) => {
+      return `${item} ${time}ms`;
+    }).join(',');
+
+    return transition;
   }
 
-  return [item, trigger, _step]; // [style对象, 切换方法, 当前步伐];
+  const trigger = (pointer: number = step + 1) => {
+    let newStep = pointer === styleList.length ? 0 : pointer;
+    _refOldStep.current = step;
+    triggerStep(newStep);
+  }
+
+  return [style, trigger, step]; // [style对象, 切换方法, 当前步伐];
 }
 
 export default useTransition;
