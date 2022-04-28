@@ -105,8 +105,11 @@ const PopupList = () => {
   ]);
 
   useLayoutEffect(() => {
-    pointer === -1 && triggerStyle(0);
-    pointer !== -1 && triggerStyle(1);
+    if (pointer === -1) {
+      triggerStyle(0);
+    } else {
+      triggerStyle(1)
+    }
   }, [pointer]);
 
   return <>

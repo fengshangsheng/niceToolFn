@@ -1,9 +1,8 @@
-let canceller: number = 0;
-
 export function setRequestAnimationFrame(
   fn: Function,
   timeout: number = 0,
 ) {
+  let canceller: number = 0;
   const startMs = performance.now()
   const init = () => {
     canceller = requestAnimationFrame(() => {
@@ -20,20 +19,4 @@ export function setRequestAnimationFrame(
   return () => {
     cancelAnimationFrame(canceller)
   }
-}
-
-export function setLoopRequestAnimationFrame(fn: Function, pace: number = 0): () => void {
-  let isStop = false;
-  const clear = () => {
-    isStop = true;
-    cancelAnimationFrame(canceller);
-  }
-  const init = () => {
-    setRequestAnimationFrame(() => {
-      fn();
-      !isStop && init();
-    }, pace)
-  }
-  init();
-  return () => clear()
 }

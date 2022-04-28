@@ -1,11 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { setLoopRequestAnimationFrame } from '../../helpers/requestAnimationFrame';
+import { setRequestAnimationFrame } from '../../helpers/requestAnimationFrame';
+import useFirstState from '../../hook/useFirstState';
 
-type IProps = {
-  frames: string[]
-  className?: string
-  pace?: number
-}
 
 const _styleUl: { [key: string]: any } = {
   display: 'inline-block',
@@ -18,13 +14,20 @@ const _styleLi: { [key: string]: any } = {
   top: 0
 }
 
-let clearFn: Function;
-export default function (props: IProps) {
+type IProps = {
+  frames: string[] // 帧图片
+  className?: string // 类名
+  pace?: number // 步伐
+  pause?: boolean // 是否暂停动画
+}
+
+const LoopFrames = (props: IProps) => {
+  const isFirst = useFirstState();
+  const _refClearFn = useRef<undefined | (() => void)>();
   // 已加载的帧数量
   const [loadFrame, triggerLoadFrame] = useState<string[]>([]);
   // 当前显示的关键帧
   const [frame, updateFrame] = useState(0);
-  const _refFrame = useRef(frame);
 
   const updateLoaded = (frame: string) => {
     const flag = loadFrame.includes(frame)
@@ -37,17 +40,53 @@ export default function (props: IProps) {
     return loadFrame.length === props.frames.length
   }, [loadFrame.length]);
 
+  const play = () => {
+    stop();
+    changeNextFrames();
+  }
+  const stop = () => {
+    _refClearFn.current && _refClearFn.current()
+  }
+  const changeNextFrames = () => {
+    _refClearFn.current = setRequestAnimationFrame(() => {
+      let newFrame = frame + 1;
+      newFrame = newFrame > props.frames.length - 1 ? 0 : newFrame;
+      updateFrame(newFrame);
+    }, props.pace || 60);
+  }
+
   useEffect(() => {
-    if (hasLoadEnd) {
-      clearFn = setLoopRequestAnimationFrame(() => {
-        let newFrame = _refFrame.current + 1;
-        newFrame = newFrame > props.frames.length - 1 ? 0 : newFrame;
-        _refFrame.current = newFrame;
-        updateFrame(newFrame);
-      }, props.pace || 60);
+    console.log(props.pause);
+    if (hasLoadEnd && [undefined, false].includes(props.pause)) {
+      console.log('useEffect');
+      play()
     }
-    return () => clearFn && clearFn();
+    return () => stop();
   }, [hasLoadEnd]);
+  useEffect(() => {
+    if (isFirst) {
+      return;
+    }
+    // 暂停状态，激活帧数非首张
+    if (props.pause === true && frame !== 0) {
+      play();
+      return;
+    }
+    if (props.pause === false) {
+      play();
+      return;
+    }
+  }, [props.pause])
+  useEffect(() => {
+    if (isFirst) {
+      return;
+    }
+    // 暂停状态，且激活帧数为第首张
+    if (props.pause === true && frame === 0) {
+      return;
+    }
+    changeNextFrames();
+  }, [frame]);
 
   return <ul className={props.className || ''} style={_styleUl}>
     {props.frames.map((item, index) => (
@@ -60,3 +99,4 @@ export default function (props: IProps) {
     ))}
   </ul>
 }
+export default LoopFrames;
