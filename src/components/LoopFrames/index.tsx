@@ -56,9 +56,7 @@ const LoopFrames = (props: IProps) => {
   }
 
   useEffect(() => {
-    console.log(props.pause);
     if (hasLoadEnd && [undefined, false].includes(props.pause)) {
-      console.log('useEffect');
       play()
     }
     return () => stop();

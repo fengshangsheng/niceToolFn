@@ -40,11 +40,11 @@ const _popupMaskStyle: TKeyVal = {
 
 const _popupTransition: TList[] = [
   [300, {
-    transform: 'translateX(-50%) translateY(-50%) scale(1)',
+    transform: 'translateX(-50%) translateY(-50%) scale(0.875)',
     opacity: 0
   }],
   [300, {
-    transform: 'translateX(-50%) translateY(-50%) scale(1.185)',
+    transform: 'translateX(-50%) translateY(-50%) scale(1)',
     opacity: 1
   }]
 ]
@@ -126,13 +126,24 @@ const Popup = React.forwardRef((props: IProps_Popup, ref) => {
   const [pointer, triggerPointer] = useState(-1);
   const [transition, triggerTransition] = useState(_popupTransition);
 
-  const open = (component: TComponent, transition?: TList[]) => {
-    if (transition) {
-      triggerTransition(transition);
+  const open = (component: TComponent, option?: {
+    transition?: TList[]
+  }) => {
+    let _popupList = [...popupList];
+    let _pointer = pointer;
+
+    if (option) {
+      if (option.transition) {
+        triggerTransition(option.transition);
+      }
+      // if (option.clearPre) {
+      //   _popupList = [..._popupList.slice(0, -2), ..._popupList.slice(-1)]
+      //   _pointer = _pointer - 1;
+      // }
     }
 
-    triggerPopupList([...popupList, component]);
-    triggerPointer(pointer + 1);
+    triggerPopupList([..._popupList, component]);
+    triggerPointer(_pointer + 1);
   }
 
   const clear = () => {
