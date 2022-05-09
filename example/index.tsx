@@ -29,28 +29,22 @@ const App = () => {
      * _ref.current.clearAll()  关闭全部弹窗
      * */
     _ref.current.open(
-      <Modal/>
-      // (props: any) => (<>
-      //   <h1>~~~~~~{props.count}</h1>
-      //   <button onClick={() => handleOpen()}>open</button>
-      //   <button onClick={() => _ref.current.clear()}>clear</button>
-      //   <button onClick={() => _ref.current.clearAll()}>clearAll</button>
-      //   <button onClick={() => props.handleAdd(props.count + 1)}>add</button>
-      // </>)
-      ,
+      <Modal/>,
       // 选填，可自定义动画
-      [
-        [200, {
-          transform: 'translateX(-50%) translateY(-50%) scale(1)',
-          opacity: 0,
-          backgroundColor: 'yellow'
-        }],
-        [200, {
-          opacity: 1,
-          transform: 'translateX(-50%) translateY(-50%) scale(2.185)',
-          backgroundColor: 'blue'
-        }]
-      ]
+      // {
+      //   style: [
+      //     [200, {
+      //       transform: 'translateX(-50%) translateY(-50%) scale(1)',
+      //       opacity: 0,
+      //       backgroundColor: 'yellow'
+      //     }],
+      //     [200, {
+      //       opacity: 1,
+      //       transform: 'translateX(-50%) translateY(-50%) scale(2.185)',
+      //       backgroundColor: 'blue'
+      //     }]
+      //   ]
+      // }
     )
   }
 
