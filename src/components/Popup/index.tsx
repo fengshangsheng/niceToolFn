@@ -8,7 +8,7 @@ const _popupDefaultStyle: TList[] = [
     left: '50%',
     top: '50%',
     zIndex: '10',
-    transform: 'translateX(-50%) translateY(-50%) scale(0.875)',
+    transform: 'translateX(calc(-50% + 0.5px)) translateY(calc(-50% + 0.5px)) scale(0.875)',
     opacity: 0
   }],
   [300, {
@@ -16,7 +16,7 @@ const _popupDefaultStyle: TList[] = [
     left: '50%',
     top: '50%',
     zIndex: '10',
-    transform: 'translateX(-50%) translateY(-50%) scale(1)',
+    transform: 'translateX(calc(-50% + 0.5px)) translateY(calc(-50% + 0.5px)) scale(1)',
     opacity: 1
   }]
 ]
